@@ -1,0 +1,251 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.crm { display: flex; height: 580px; background: var(--color-background-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
+.sidebar { width: 200px; background: var(--color-background-primary); border-right: 0.5px solid var(--color-border-tertiary); padding: 16px 0; flex-shrink: 0; }
+.logo { padding: 0 16px 20px; font-size: 15px; font-weight: 500; color: var(--color-text-primary); border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 8px; }
+.logo span { color: #1D9E75; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; transition: background 0.15s; }
+.nav-item:hover { background: var(--color-background-secondary); }
+.nav-item.active { background: #E1F5EE; color: #0F6E56; font-weight: 500; }
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; background: #1D9E75; color: white; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { padding: 12px 20px; background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 12px; }
+.page-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.google-badge { display: flex; align-items: center; gap: 6px; background: #E6F1FB; border: 0.5px solid #B5D4F4; padding: 5px 10px; border-radius: var(--border-radius-md); font-size: 12px; color: #185FA5; }
+.btn-primary { background: #1D9E75; color: white; border: none; padding: 6px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; }
+.content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.metric { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px; }
+.metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.metric-sub { font-size: 11px; color: #1D9E75; margin-top: 2px; }
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; }
+.panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; }
+.panel-head { padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 8px; }
+.panel-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.panel-action { font-size: 11px; color: #1D9E75; cursor: pointer; }
+.contact-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.contact-row:last-child { border-bottom: none; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.av-teal { background: #9FE1CB; color: #085041; }
+.av-blue { background: #B5D4F4; color: #0C447C; }
+.av-amber { background: #FAC775; color: #633806; }
+.av-purple { background: #CECBF6; color: #3C3489; }
+.contact-info { flex: 1; min-width: 0; }
+.contact-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contact-company { font-size: 11px; color: var(--color-text-secondary); }
+.tag { font-size: 10px; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+.tag-hot { background: #FAECE7; color: #993C1D; }
+.tag-warm { background: #FAEEDA; color: #854F0B; }
+.tag-cold { background: #E6F1FB; color: #185FA5; }
+.tag-new { background: #EAF3DE; color: #3B6D11; }
+.deal-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.deal-row:last-child { border-bottom: none; }
+.deal-name { font-size: 13px; color: var(--color-text-primary); flex: 1; }
+.deal-amount { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.stage { font-size: 10px; padding: 2px 7px; border-radius: 10px; }
+.stage-neg { background: #FAEEDA; color: #854F0B; }
+.stage-prop { background: #CECBF6; color: #3C3489; }
+.stage-won { background: #9FE1CB; color: #085041; }
+.stage-qual { background: #E6F1FB; color: #185FA5; }
+.gcal { padding: 10px 14px; }
+.cal-event { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.cal-event:last-child { border-bottom: none; }
+.cal-time { font-size: 11px; color: var(--color-text-secondary); min-width: 50px; }
+.cal-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+.dot-blue { background: #378ADD; }
+.dot-teal { background: #1D9E75; }
+.dot-amber { background: #BA7517; }
+.cal-text { font-size: 12px; color: var(--color-text-primary); line-height: 1.4; }
+.cal-sub { font-size: 11px; color: var(--color-text-secondary); }
+.g-icon { display: inline-flex; align-items: center; gap: 3px; }
+</style>
+
+<div class="crm">
+  <div class="sidebar">
+    <div class="logo">My<span>CRM</span></div>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" opacity="0.7"/><rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" opacity="0.7"/><rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" opacity="0.7"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" opacity="0.4"/></svg>
+      Дашборд
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Контакти
+      <span class="nav-badge">142</span>
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 12V4l6-2 6 2v8l-6 2-6-2z" stroke="currentColor" stroke-width="1.2"/></svg>
+      Угоди
+      <span class="nav-badge">23</span>
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M1 6h14" stroke="currentColor" stroke-width="1.2"/><path d="M5 2V6M11 2V6" stroke="currentColor" stroke-width="1.2"/></svg>
+      Календар
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Gmail
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2L2 5v4c0 3 2.7 5.2 6 6 3.3-.8 6-3 6-6V5L8 2z" stroke="currentColor" stroke-width="1.2"/></svg>
+      Звіти
+    </div>
+    <div class="nav-item" style="margin-top:auto; padding-top: 200px;">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 6v4M8 5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Налаштування
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title">Дашборд</div>
+      <div class="google-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Google підключено
+      </div>
+      <button class="btn-primary">+ Новий контакт</button>
+    </div>
+
+    <div class="content">
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Контактів</div>
+          <div class="metric-val">142</div>
+          <div class="metric-sub">↑ +8 цього місяця</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Активних угод</div>
+          <div class="metric-val">23</div>
+          <div class="metric-sub">↑ +3 цього тижня</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Сума угод</div>
+          <div class="metric-val">₴2.4M</div>
+          <div class="metric-sub">↑ +12% vs минулий місяць</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Зустрічей сьогодні</div>
+          <div class="metric-val">3</div>
+          <div class="metric-sub" style="color:#185FA5;">з Google Calendar</div>
+        </div>
+      </div>
+
+      <div class="panels">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Останні контакти</div>
+            <span class="panel-action">Всі →</span>
+          </div>
+          <div class="contact-row">
+            <div class="avatar av-teal">ОК</div>
+            <div class="contact-info">
+              <div class="contact-name">Олена Ковальчук</div>
+              <div class="contact-company">TechStart UA</div>
+            </div>
+            <span class="tag tag-hot">гарячий</span>
+          </div>
+          <div class="contact-row">
+            <div class="avatar av-blue">ІМ</div>
+            <div class="contact-info">
+              <div class="contact-name">Ігор Мельник</div>
+              <div class="contact-company">Innovate Group</div>
+            </div>
+            <span class="tag tag-warm">теплий</span>
+          </div>
+          <div class="contact-row">
+            <div class="avatar av-amber">НС</div>
+            <div class="contact-info">
+              <div class="contact-name">Наталя Сидоренко</div>
+              <div class="contact-company">Digital Solutions</div>
+            </div>
+            <span class="tag tag-new">новий</span>
+          </div>
+          <div class="contact-row">
+            <div class="avatar av-purple">АБ</div>
+            <div class="contact-info">
+              <div class="contact-name">Андрій Бондаренко</div>
+              <div class="contact-company">ProLogic Ltd</div>
+            </div>
+            <span class="tag tag-cold">холодний</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Активні угоди</div>
+            <span class="panel-action">Всі →</span>
+          </div>
+          <div class="deal-row">
+            <div class="contact-info">
+              <div class="deal-name">CRM впровадження</div>
+              <div class="contact-company">TechStart UA</div>
+            </div>
+            <span class="stage stage-neg">переговори</span>
+            <div class="deal-amount">₴480K</div>
+          </div>
+          <div class="deal-row">
+            <div class="contact-info">
+              <div class="deal-name">Розробка платформи</div>
+              <div class="contact-company">Innovate Group</div>
+            </div>
+            <span class="stage stage-prop">пропозиція</span>
+            <div class="deal-amount">₴920K</div>
+          </div>
+          <div class="deal-row">
+            <div class="contact-info">
+              <div class="deal-name">SEO + Маркетинг</div>
+              <div class="contact-company">Digital Solutions</div>
+            </div>
+            <span class="stage stage-qual">кваліфікація</span>
+            <div class="deal-amount">₴155K</div>
+          </div>
+          <div class="deal-row">
+            <div class="contact-info">
+              <div class="deal-name">Логістична система</div>
+              <div class="contact-company">ProLogic Ltd</div>
+            </div>
+            <span class="stage stage-won">виграно</span>
+            <div class="deal-amount">₴840K</div>
+          </div>
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1;">
+          <div class="panel-head">
+            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            <div class="panel-title">Google Calendar — сьогодні, 24 березня</div>
+            <span class="panel-action">Відкрити Calendar →</span>
+          </div>
+          <div class="gcal">
+            <div class="cal-event">
+              <div class="cal-time">09:30</div>
+              <div class="cal-dot dot-blue"></div>
+              <div>
+                <div class="cal-text">Дзвінок з Оленою Ковальчук — TechStart UA</div>
+                <div class="cal-sub">Google Meet · 30 хв · CRM впровадження</div>
+              </div>
+            </div>
+            <div class="cal-event">
+              <div class="cal-time">12:00</div>
+              <div class="cal-dot dot-teal"></div>
+              <div>
+                <div class="cal-text">Презентація пропозиції — Innovate Group</div>
+                <div class="cal-sub">Офіс клієнта · 1 год · Розробка платформи</div>
+              </div>
+            </div>
+            <div class="cal-event">
+              <div class="cal-time">15:30</div>
+              <div class="cal-dot dot-amber"></div>
+              <div>
+                <div class="cal-text">Знайомство з Наталею Сидоренко</div>
+                <div class="cal-sub">Google Meet · 45 хв · Новий лід</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
