@@ -70,9 +70,10 @@ function bindEvents() {
   });
 
   els.fileInput.addEventListener("change", async (event) => {
-    const [file] = event.target.files;
-    if (!file) return;
-    loadCsv(await file.text(), file.name);
+    const files = [...event.target.files].filter((file) => /\.csv$/i.test(file.name) || file.type.includes("csv"));
+    if (!files.length) return;
+    await loadCsvFiles(files);
+    event.target.value = "";
   });
 
   els.rangeMode.addEventListener("click", (event) => {
@@ -116,6 +117,46 @@ function loadCsv(csv, sourceName) {
   update();
 }
 
+async function loadCsvFiles(files) {
+  const parsedFiles = [];
+  const skipped = [];
+  let baseHeader = null;
+
+  for (const file of files) {
+    const csv = await file.text();
+    const parsed = parseCsvWithHeader(csv);
+
+    if (!parsed.header.length) {
+      skipped.push(`${file.name}: порожній файл`);
+      continue;
+    }
+
+    if (!baseHeader) {
+      baseHeader = parsed.header;
+    }
+
+    if (!sameHeader(baseHeader, parsed.header)) {
+      skipped.push(`${file.name}: інша структура колонок`);
+      continue;
+    }
+
+    parsedFiles.push({ file, rows: parsed.rows });
+  }
+
+  const mergedRows = parsedFiles.flatMap((item) => item.rows);
+  allRows = mergedRows.map(normalizeRow).filter((row) => row[fields.id] || row[fields.task]);
+  populateFilters();
+  setDefaultDates();
+
+  const sourceLabel =
+    files.length === 1
+      ? `${files[0].name}`
+      : `${parsedFiles.length} CSV об'єднано (${formatNumber(allRows.length)} задач)`;
+  const warning = skipped.length ? ` Пропущено: ${skipped.join("; ")}.` : "";
+  setNotice(`${sourceLabel}: завантажено ${allRows.length} задач.${warning}`);
+  update();
+}
+
 function update() {
   filteredRows = allRows.filter(matchesFilters);
   updateHeader();
@@ -127,6 +168,10 @@ function update() {
 }
 
 function parseCsv(text) {
+  return parseCsvWithHeader(text).rows;
+}
+
+function parseCsvWithHeader(text) {
   const rows = [];
   let row = [];
   let cell = "";
@@ -166,7 +211,14 @@ function parseCsv(text) {
   if (row.some((value) => value.trim())) rows.push(row);
 
   const header = rows.shift() || [];
-  return rows.map((values) => Object.fromEntries(header.map((key, index) => [key, values[index] || ""])));
+  return {
+    header,
+    rows: rows.map((values) => Object.fromEntries(header.map((key, index) => [key, values[index] || ""]))),
+  };
+}
+
+function sameHeader(a, b) {
+  return a.length === b.length && a.every((value, index) => clean(value) === clean(b[index]));
 }
 
 function normalizeRow(row) {
