@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MounthAnalytic</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-inner">
+          <div class="logo-row">
+            <div class="logo-icon">M</div>
+            <div>
+              <h1 id="reportTitle">MounthAnalytic</h1>
+              <div class="subtitle">Аналітика таблиці · Notion Export</div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <div class="date-badge" id="dateBadge">-</div>
+            <label class="upload-btn">
+              <input id="fileInput" type="file" accept=".csv,text/csv" />
+              Завантажити CSV
+            </label>
+          </div>
+        </div>
+      </header>
+
+      <div class="control-card">
+        <div class="control-head">
+          <div>
+            <div class="control-title">Керування вибіркою</div>
+            <div class="control-sub" id="notice">Завантаження демо-даних...</div>
+          </div>
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="overview">Огляд</button>
+            <button class="tab" data-tab="team">Дизайнера</button>
+            <button class="tab" data-tab="geo">GEO</button>
+            <button class="tab" data-tab="insights">Аналітика</button>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="filter-group compact">
+            <span>Період</span>
+            <div class="filter-buttons" id="rangeMode">
+              <button class="filter-btn all active" data-mode="all">Усе</button>
+              <button class="filter-btn" data-mode="month">Місяць</button>
+              <button class="filter-btn" data-mode="custom">Дні</button>
+            </div>
+          </div>
+          <label class="filter-field">
+            Поле дати
+            <select id="dateField"></select>
+          </label>
+          <label class="filter-field" id="monthWrap" hidden>
+            Місяць
+            <input id="monthInput" type="month" />
+          </label>
+          <label class="filter-field" id="startWrap" hidden>
+            Від
+            <input id="startDate" type="date" />
+          </label>
+          <label class="filter-field" id="endWrap" hidden>
+            До
+            <input id="endDate" type="date" />
+          </label>
+          <label class="filter-field">
+            Дизайнер
+            <select id="designerFilter"></select>
+          </label>
+          <label class="filter-field">
+            Баєр
+            <select id="buyerFilter"></select>
+          </label>
+          <label class="filter-field">
+            Статус
+            <select id="statusFilter"></select>
+          </label>
+          <label class="filter-field">
+            Тип
+            <select id="typeFilter"></select>
+          </label>
+          <label class="filter-field search">
+            Пошук
+            <input id="searchInput" type="search" placeholder="casino, slot, offer..." />
+          </label>
+        </div>
+      </div>
+
+      <main>
+        <section class="section active" id="tab-overview">
+          <div class="kpi-grid" id="overviewKpis"></div>
+
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Пікові дні — навантаження</div>
+              <div class="bar-chart" id="peakDaysChart"></div>
+              <div class="chart-note" id="peakDaysNote"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Формат креативу</div>
+              <div class="bar-chart" id="creativeChart"></div>
+              <div class="split-block">
+                <div class="chart-title">Тип креативу</div>
+                <div class="bar-chart" id="typeChart"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card timeline-card">
+            <div class="chart-title">Активність по днях</div>
+            <div class="timeline-chart" id="timelineChart"></div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Пріоритет тасок</div>
+              <div class="bar-chart" id="priorityChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Статуси</div>
+              <div class="bar-chart" id="statusChart"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="tab-team">
+          <div class="section-label">Дизайнери — кількість тасок та креативів</div>
+          <div class="designer-grid" id="designerCards"></div>
+
+          <div class="charts-grid team-charts">
+            <div class="chart-card">
+              <div class="chart-title">Дизайнери — кількість креативів</div>
+              <div class="bar-chart" id="designerCreativeChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Дизайнери — кількість тасок</div>
+              <div class="bar-chart" id="designerTaskChart"></div>
+            </div>
+          </div>
+
+          <div class="chart-card designer-detail-card" id="designerDetailCard"></div>
+
+          <div class="chart-card">
+            <div class="chart-title">Баєри — замовлення та обсяг</div>
+            <div class="bar-chart" id="buyerChart"></div>
+          </div>
+        </section>
+
+        <section class="section" id="tab-geo">
+          <div class="kpi-grid" id="geoKpis"></div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Топ GEO за к-стю тасок</div>
+              <div class="bar-chart" id="geoTaskChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Топ GEO за к-стю креативів</div>
+              <div class="bar-chart" id="geoCreativeChart"></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Мови креативів</div>
+            <div class="tag-list" id="languageTags"></div>
+          </div>
+        </section>
+
+        <section class="section" id="tab-insights">
+          <div class="insights-grid" id="insightCards"></div>
+
+          <div class="chart-card">
+            <div class="chart-title">Аналіз вмісту тасок — типи контенту</div>
+            <div class="content-grid" id="contentCards"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">Ключові паттерни у завданнях</div>
+            <div class="pattern-list" id="patternList"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">Таблиця задач</div>
+            <div class="table-actions">
+              <button class="filter-btn" id="exportFiltered">Експорт фільтру</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Таска</th>
+                    <th>Дата</th>
+                    <th>Дизайнер</th>
+                    <th>Баєр</th>
+                    <th>К-сть</th>
+                    <th>Статус</th>
+                    <th>GEO</th>
+                  </tr>
+                </thead>
+                <tbody id="taskRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
