@@ -5,3 +5,6 @@ scratch/
 *.zip
 Demo/
 Demo.zip
+__pycache__/
+*.pyc
+.claude/

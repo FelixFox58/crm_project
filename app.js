@@ -21,6 +21,7 @@ let allRows = [];
 let filteredRows = [];
 let rangeMode = "all";
 let selectedDesigner = "";
+let selectedDay = "";
 
 const els = {
   fileInput: document.querySelector("#fileInput"),
@@ -50,7 +51,19 @@ window.addEventListener("DOMContentLoaded", async () => {
   els.dateField.value = "Дата створення";
   bindEvents();
 
-  // Try to load cached CSV rows from localStorage
+  // 1. Snapshot from the repo has priority: it is auto-synced from Notion by GitHub Actions,
+  // so everyone always sees fresh data without manual CSV uploads.
+  try {
+    const snapshot = await fetch("assets/latest-data.json", { cache: "no-store" });
+    if (!snapshot.ok) throw new Error("No saved snapshot");
+    loadSnapshot(await snapshot.json(), "Актуальні дані (авто-синхронізація з Notion)");
+    showResetCacheButton(false);
+    return;
+  } catch {
+    // fall through to cache / demo
+  }
+
+  // 2. Fallback: cached CSV rows from localStorage (offline / local usage)
   const cachedRows = localStorage.getItem("mounthanalytic_cached_rows");
   const cachedSource = localStorage.getItem("mounthanalytic_cached_source") || "Кеш з браузера";
   if (cachedRows) {
@@ -69,22 +82,16 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // 3. Fallback: demo CSV
   try {
-    const snapshot = await fetch("assets/latest-data.json", { cache: "no-store" });
-    if (!snapshot.ok) throw new Error("No saved snapshot");
-    loadSnapshot(await snapshot.json(), "Остання збережена аналітика");
+    const response = await fetch("assets/sample-notion-export.csv");
+    if (!response.ok) throw new Error("No demo CSV");
+    const csv = await response.text();
+    loadCsv(csv, "Демо-дані з поточного Notion export");
     showResetCacheButton(false);
   } catch {
-    try {
-      const response = await fetch("assets/sample-notion-export.csv");
-      if (!response.ok) throw new Error("No demo CSV");
-      const csv = await response.text();
-      loadCsv(csv, "Демо-дані з поточного Notion export");
-      showResetCacheButton(false);
-    } catch {
-      setNotice("Завантажте CSV-файл експорту Notion або додайте assets/latest-data.json, щоб усі бачили останню аналітику.");
-      showResetCacheButton(false);
-    }
+    setNotice("Завантажте CSV-файл експорту Notion або додайте assets/latest-data.json, щоб усі бачили останню аналітику.");
+    showResetCacheButton(false);
   }
 });
 
@@ -94,9 +101,25 @@ function bindEvents() {
   });
 
   document.addEventListener("click", (event) => {
+    const dayReset = event.target.closest("[data-day-reset]");
+    if (dayReset) {
+      selectedDay = "";
+      renderTeam();
+      return;
+    }
+
+    const dayDrill = event.target.closest("[data-day-drill]");
+    if (dayDrill) {
+      const day = dayDrill.dataset.dayDrill;
+      selectedDay = day === selectedDay ? "" : day;
+      renderTeam();
+      return;
+    }
+
     const drill = event.target.closest("[data-designer-drill]");
     if (!drill) return;
     selectedDesigner = decodeURIComponent(drill.dataset.designerDrill);
+    selectedDay = "";
     renderTeam();
   });
 
@@ -154,6 +177,7 @@ function loadCsv(csv, sourceName) {
 
 function loadRows(rows, sourceName) {
   allRows = rows.map(normalizeRow).filter((row) => row[fields.id] || row[fields.task]);
+  pickBestDateField();
   populateFilters();
   setDefaultDates();
   setNotice(`${sourceName}: завантажено ${allRows.length} задач.`);
@@ -320,6 +344,14 @@ function addOption(select, label, value) {
 
 function uniqueValues(field) {
   return [...new Set(allRows.map((row) => clean(row[field])).filter(Boolean))].sort((a, b) => a.localeCompare(b, "uk"));
+}
+
+function pickBestDateField() {
+  // If the currently selected date field has no data, switch to the most filled one.
+  const filled = (field) => allRows.filter((row) => parseNotionDate(row[field])).length;
+  if (filled(els.dateField.value)) return;
+  const best = fields.date.reduce((a, b) => (filled(b) > filled(a) ? b : a));
+  if (filled(best)) els.dateField.value = best;
 }
 
 function setDefaultDates() {
@@ -627,10 +659,40 @@ function renderDesignerDetail(designer) {
   const creatives = sumQuantity(rows);
   const creativeBreakdown = countBy(rows, fields.creative, true).slice(0, 8);
   const topicBreakdown = countBy(rows, fields.task, true).slice(0, 10);
-  const taskList = rows
+
+  const daily = countByDate(rows, els.dateField.value);
+  if (selectedDay && !daily.some((item) => item.name === selectedDay)) selectedDay = "";
+  const dayRows = selectedDay
+    ? rows.filter((row) => {
+        const date = parseNotionDate(row[els.dateField.value]);
+        return date && toDateInput(date) === selectedDay;
+      })
+    : rows;
+  const taskList = dayRows
     .slice()
     .sort((a, b) => (parseNotionDate(b[els.dateField.value]) || 0) - (parseNotionDate(a[els.dateField.value]) || 0))
     .slice(0, 80);
+
+  const dayMax = Math.max(1, ...daily.map((item) => item.value));
+  const dayChart = daily.length
+    ? daily
+        .map((item) => {
+          const height = Math.max(6, (item.value / dayMax) * 72);
+          const active = item.name === selectedDay;
+          return `
+            <div class="day-col${active ? " active" : ""}" data-day-drill="${item.name}" title="${shortDayLabel(item.name)}: ${item.value} тасок">
+              <div class="day-val">${item.value}</div>
+              <div class="day-bar" style="height:${height.toFixed(0)}px"></div>
+              <div class="day-label">${shortDayLabel(item.name)}</div>
+            </div>
+          `;
+        })
+        .join("")
+    : `<div class="chart-note">Немає дат у вибірці.</div>`;
+
+  const taskListTitle = selectedDay
+    ? `Задачі за ${shortDayLabel(selectedDay)} — ${dayRows.length} шт.`
+    : "Конкретні задачі";
 
   card.innerHTML = `
     <div class="detail-head">
@@ -655,9 +717,14 @@ function renderDesignerDetail(designer) {
         <div class="bar-chart" id="designerTopicBreakdown"></div>
       </div>
     </div>
-    <div class="detail-subtitle">Конкретні задачі</div>
+    <div class="detail-subtitle">Активність по днях — натисніть на день, щоб побачити його таски</div>
+    <div class="day-chart">${dayChart}</div>
+    <div class="detail-subtitle task-list-head">
+      <span>${escapeHtml(taskListTitle)}</span>
+      ${selectedDay ? `<button class="filter-btn day-reset" type="button" data-day-reset>✕ Reset</button>` : ""}
+    </div>
     <div class="task-list">
-      ${taskList.map(taskPill).join("")}
+      ${taskList.map(taskPill).join("") || `<div class="chart-note">Немає задач за цей день.</div>`}
     </div>
   `;
 

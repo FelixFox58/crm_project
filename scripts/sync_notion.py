@@ -172,7 +172,15 @@ def map_notion_pages_to_rows(pages):
                         break
             
             row[key] = extract_property_value(prop) if prop else ""
-            
+
+        # 'Дата створення' is usually the Notion system field 'created_time',
+        # not a database property, so fall back to it when the property is empty.
+        if not row.get("Дата створення"):
+            created = page.get("created_time", "")
+            if created and "T" in created:
+                created = created.replace("T", " ").split(".")[0].replace("Z", "")
+            row["Дата створення"] = created
+
         mapped_rows.append(row)
         
     return mapped_rows
