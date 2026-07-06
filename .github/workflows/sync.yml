@@ -24,13 +24,13 @@ jobs:
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-        run: python public/mounthanalytic/scripts/sync_notion.py
+        run: python scripts/sync_notion.py
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/mounthanalytic/assets/latest-data.json
+          git add assets/latest-data.json
           
           # Check if there are changes to commit
           if git diff --quiet && git diff --cached --quiet; then

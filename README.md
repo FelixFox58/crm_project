@@ -1,148 +1,85 @@
-# MyCRM — Smart Business Platform
+# MounthAnalytic
 
-> Сучасна CRM система з повною інтеграцією Google Workspace
+Інтерактивний дашборд для CSV-експорту Notion бази `Design Room`.
 
-![MyCRM Screenshot](https://img.shields.io/badge/React-18-61dafb?style=flat&logo=react)
-![Google API](https://img.shields.io/badge/Google_API-OAuth2-4285f4?style=flat&logo=google)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat)
+## Що вже є
 
----
+- Фільтр по датах: усе, конкретний місяць, довільний діапазон днів.
+- Вибір поля дати: `Дата створення`, `Дата взяття в роботу`, `Дата видачі`.
+- Аналітика по дизайнерах, баєрах, статусах, GEO, типах креативів і пріоритетах.
+- KPI: кількість задач, сума `К-сть`, частка виконаних, середній цикл від взяття в роботу до видачі.
+- Пошук по тексту задач і таблиця відфільтрованих задач.
+- Експорт поточного фільтру назад у CSV.
+- Деталізація по дизайнерах: клік по дизайнеру відкриває задачі, теми, формати та кількість креативів.
+- Збереження останньої аналітики через `assets/latest-data.json`, щоб усі відвідувачі бачили актуальний snapshot без ручного CSV.
 
-## Можливості
+## Як запускати локально
 
-- **Дашборд** — метрики, угоди, контакти, активність
-- **Контакти** — пошук, фільтри, статуси (гарячий/теплий/холодний)
-- **Угоди** — Kanban pipeline з воронкою продажів
-- **Google Workspace** — Gmail, Calendar, Drive, Contacts, Sheets, Meet
-- **Темна тема** — повністю dark UI
-
-## Технології
-
-| Шар | Технологія |
-|-----|-----------|
-| Frontend | React 18, CSS Variables |
-| Icons | Lucide React |
-| Auth | Google OAuth 2.0 |
-| Deploy | GitHub Pages |
-| Fonts | DM Sans, DM Mono |
-
-## Швидкий старт
+Найпростіше:
 
 ```bash
-# Клонуйте репозиторій
-git clone https://github.com/YOUR_USERNAME/my-crm.git
-cd my-crm
-
-# Встановіть залежності
-npm install
-
-# Запустіть локально
-npm start
+cd ~/Desktop/MounthAnalytic
+python3 -m http.server 8080
 ```
 
-Відкрийте [http://localhost:3000](http://localhost:3000)
+Потім відкрити:
 
-## Деплой на GitHub Pages
-
-### 1. Відредагуйте `package.json`
-
-```json
-"homepage": "https://YOUR_USERNAME.github.io/my-crm"
+```text
+http://localhost:8080
 ```
 
-### 2. Задеплойте
+Пряме відкриття `index.html` може працювати не у всіх браузерах, тому локальний сервер надійніший.
 
-```bash
-npm run deploy
+## Як працювати щомісяця
+
+1. Експортуйте базу з Notion у CSV.
+2. Відкрийте дашборд.
+3. Натисніть `Завантажити CSV`.
+4. Можна вибрати один або кілька CSV одночасно.
+5. Виберіть потрібний місяць або конкретні дні у фільтрах.
+
+## Як зберегти останню аналітику для всіх
+
+GitHub Pages не може сам записувати файли на сервер, тому snapshot оновлюється через commit:
+
+1. Завантажте один або кілька CSV у дашборд.
+2. Натисніть `Зберегти snapshot`.
+3. Браузер завантажить файл `latest-data.json`.
+4. Покладіть цей файл у:
+
+```text
+public/mounthanalytic/assets/latest-data.json
 ```
 
-Сайт буде доступний на: `https://YOUR_USERNAME.github.io/my-crm`
+5. Зробіть commit і push.
+6. Запустіть deploy GitHub Pages, якщо сайт не оновився автоматично.
 
-## Підключення Google API
+Після цього всі, хто відкриє посилання, автоматично побачать останню збережену аналітику. CSV їм завантажувати не потрібно.
 
-### Крок 1 — Google Cloud Console
+Поточний ZIP-експорт Notion містить вкладений ZIP і CSV-файл `Design Room ..._all.csv`. Для GitHub Pages найпростіший формат імпорту - саме CSV. Якщо потрібно завантажувати ZIP напряму, наступним кроком можна додати JSZip або невеликий бекенд-конвертер.
 
-1. Зайдіть на [console.cloud.google.com](https://console.cloud.google.com)
-2. Створіть новий проєкт: **"MyCRM"**
-3. Перейдіть у **APIs & Services → Library**
-4. Увімкніть:
-   - Gmail API
-   - Google Calendar API
-   - People API (Contacts)
-   - Google Drive API
+## GitHub Pages
 
-### Крок 2 — OAuth Credentials
+Проект є статичним сайтом, тому підходить для GitHub Pages:
 
-1. **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID**
-2. Application type: **Web application**
-3. Authorized origins: `http://localhost:3000` та `https://YOUR_USERNAME.github.io`
-4. Скопіюйте **Client ID**
+1. Завантажити файли в репозиторій GitHub.
+2. У `Settings -> Pages` вибрати `Deploy from a branch`.
+3. Вибрати гілку `main` і папку `/root`.
+4. Відкрити посилання, яке GitHub Pages згенерує після деплою.
 
-### Крок 3 — Додайте в проєкт
+## Дані та приватність
 
-Встановіть бібліотеку:
+CSV-файли з Notion не комітяться в репозиторій: вони ігноруються через `.gitignore`.
 
-```bash
-npm install @react-oauth/google
-```
+`latest-data.json` можна комітити, якщо ви свідомо хочете показати останню аналітику всім, хто має посилання. Якщо в даних є чутлива інформація, не публікуйте snapshot.
 
-В `src/index.js`:
+Користувачі завантажують CSV прямо у браузері через кнопку `Завантажити CSV`. Файл не відправляється на сервер і обробляється локально в браузері.
 
-```jsx
-import { GoogleOAuthProvider } from '@react-oauth/google';
+## Уточнення для наступної ітерації
 
-root.render(
-  <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
-    <App />
-  </GoogleOAuthProvider>
-);
-```
-
-Кнопка входу:
-
-```jsx
-import { useGoogleLogin } from '@react-oauth/google';
-
-const login = useGoogleLogin({
-  onSuccess: (token) => console.log(token),
-  scope: [
-    'https://www.googleapis.com/auth/gmail.readonly',
-    'https://www.googleapis.com/auth/calendar.readonly',
-    'https://www.googleapis.com/auth/contacts.readonly',
-  ].join(' '),
-});
-```
-
-## Структура проєкту
-
-```
-my-crm/
-├── public/
-│   └── index.html
-├── src/
-│   ├── components/
-│   │   ├── Sidebar.jsx          # Навігація
-│   │   ├── Dashboard.jsx        # Головна сторінка
-│   │   ├── Contacts.jsx         # Список контактів
-│   │   ├── Deals.jsx            # Kanban угод
-│   │   └── GoogleIntegration.jsx # Google Workspace
-│   ├── data/
-│   │   └── mockData.js          # Тестові дані
-│   ├── App.jsx                  # Роутинг
-│   ├── index.js                 # Точка входу
-│   └── index.css                # Глобальні стилі
-└── package.json
-```
-
-## Наступні кроки
-
-- [ ] Backend API (Node.js + Express)
-- [ ] База даних (PostgreSQL / MongoDB)
-- [ ] Реальна Gmail синхронізація
-- [ ] Email-відправка з CRM
-- [ ] Мобільна версія
-- [ ] Мультикористувач + ролі
-
-## Ліцензія
-
-MIT © 2025 MyCRM
+- Яка дата є головною для звітності: створення, взяття в роботу чи видача?
+- `К-сть` означає кількість креативів у задачі, чи це треба рахувати інакше?
+- Які статуси вважаються завершеними, окрім `Виконано`?
+- Чи треба порівняння місяць до місяця після кількох експортів?
+- Чи потрібні ролі/доступи, або достатньо публічної демонстрації через GitHub Pages?
+- Які слова/категорії в текстах задач важливі: продукт, формат, офер, казино/беттинг, мова, плейсмент?
