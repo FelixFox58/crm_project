@@ -42,6 +42,7 @@ const els = {
   searchInput: document.querySelector("#searchInput"),
   snapshotExport: document.querySelector("#snapshotExport"),
   exportFiltered: document.querySelector("#exportFiltered"),
+  resetCache: document.querySelector("#resetCache"),
 };
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -49,18 +50,40 @@ window.addEventListener("DOMContentLoaded", async () => {
   els.dateField.value = "Дата створення";
   bindEvents();
 
+  // Try to load cached CSV rows from localStorage
+  const cachedRows = localStorage.getItem("mounthanalytic_cached_rows");
+  const cachedSource = localStorage.getItem("mounthanalytic_cached_source") || "Кеш з браузера";
+  if (cachedRows) {
+    try {
+      allRows = JSON.parse(cachedRows);
+      populateFilters();
+      setDefaultDates();
+      setNotice(`${cachedSource}: завантажено ${allRows.length} задач.`);
+      update();
+      showResetCacheButton(true);
+      return;
+    } catch (e) {
+      console.error("Failed to parse cached rows from localStorage", e);
+      localStorage.removeItem("mounthanalytic_cached_rows");
+      localStorage.removeItem("mounthanalytic_cached_source");
+    }
+  }
+
   try {
     const snapshot = await fetch("assets/latest-data.json", { cache: "no-store" });
     if (!snapshot.ok) throw new Error("No saved snapshot");
     loadSnapshot(await snapshot.json(), "Остання збережена аналітика");
+    showResetCacheButton(false);
   } catch {
     try {
       const response = await fetch("assets/sample-notion-export.csv");
       if (!response.ok) throw new Error("No demo CSV");
-    const csv = await response.text();
-    loadCsv(csv, "Демо-дані з поточного Notion export");
+      const csv = await response.text();
+      loadCsv(csv, "Демо-дані з поточного Notion export");
+      showResetCacheButton(false);
     } catch {
       setNotice("Завантажте CSV-файл експорту Notion або додайте assets/latest-data.json, щоб усі бачили останню аналітику.");
+      showResetCacheButton(false);
     }
   }
 });
@@ -110,6 +133,13 @@ function bindEvents() {
 
   els.snapshotExport.addEventListener("click", exportSnapshotJson);
   els.exportFiltered.addEventListener("click", exportFilteredCsv);
+  if (els.resetCache) {
+    els.resetCache.addEventListener("click", () => {
+      localStorage.removeItem("mounthanalytic_cached_rows");
+      localStorage.removeItem("mounthanalytic_cached_source");
+      window.location.reload();
+    });
+  }
 }
 
 function switchTab(name) {
@@ -173,6 +203,15 @@ async function loadCsvFiles(files) {
       ? `${files[0].name}`
       : `${parsedFiles.length} CSV об'єднано (${formatNumber(allRows.length)} задач)`;
   const warning = skipped.length ? ` Пропущено: ${skipped.join("; ")}.` : "";
+
+  try {
+    localStorage.setItem("mounthanalytic_cached_rows", JSON.stringify(allRows));
+    localStorage.setItem("mounthanalytic_cached_source", sourceLabel);
+    showResetCacheButton(true);
+  } catch (e) {
+    console.error("Failed to cache rows to localStorage", e);
+  }
+
   setNotice(`${sourceLabel}: завантажено ${allRows.length} задач.${warning}`);
   update();
 }
@@ -481,20 +520,21 @@ function renderPatterns() {
 }
 
 function renderTable() {
+  const needle = els.searchInput.value.trim().toLowerCase();
   document.querySelector("#taskRows").innerHTML = filteredRows
     .slice(0, 250)
     .map((row) => {
       const date = parseNotionDate(row[els.dateField.value]);
       return `
         <tr>
-          <td class="task-id">${escapeHtml(row[fields.id])}</td>
-          <td class="task-name">${escapeHtml(row[fields.task])}</td>
+          <td class="task-id">${highlightSearchTerm(row[fields.id], needle)}</td>
+          <td class="task-name">${highlightSearchTerm(row[fields.task], needle)}</td>
           <td>${date ? date.toLocaleDateString("uk-UA") : ""}</td>
-          <td>${escapeHtml(row[fields.designer])}</td>
-          <td>${escapeHtml(row[fields.buyer])}</td>
+          <td>${highlightSearchTerm(row[fields.designer], needle)}</td>
+          <td>${highlightSearchTerm(row[fields.buyer], needle)}</td>
           <td>${formatNumber(row.__quantity)}</td>
           <td><span class="badge ${badgeClass(row[fields.status])}">${escapeHtml(row[fields.status])}</span></td>
-          <td class="geo-text" title="${escapeHtml(row[fields.geo])}">${escapeHtml(row[fields.geo])}</td>
+          <td class="geo-text" title="${escapeHtml(row[fields.geo])}">${highlightSearchTerm(row[fields.geo], needle)}</td>
         </tr>
       `;
     })
@@ -770,8 +810,51 @@ function badgeClass(status) {
 
 function parseNotionDate(value) {
   if (!value) return null;
-  const date = new Date(String(value).replace(/(\d{1,2}):(\d{2})\s?(AM|PM)/i, "$1:$2 $3"));
-  return Number.isNaN(date.getTime()) ? null : date;
+  const str = String(value).trim();
+
+  // 1. Try parsing DD/MM/YYYY or DD.MM.YYYY
+  // Optional time: HH:MM or HH:MM:SS or HH:MM AM/PM
+  const dmyMatch = str.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*(AM|PM))?)?$/i);
+  if (dmyMatch) {
+    const day = parseInt(dmyMatch[1], 10);
+    const month = parseInt(dmyMatch[2], 10) - 1; // 0-indexed
+    const year = parseInt(dmyMatch[3], 10);
+    let hours = dmyMatch[4] ? parseInt(dmyMatch[4], 10) : 0;
+    const minutes = dmyMatch[5] ? parseInt(dmyMatch[5], 10) : 0;
+    const seconds = dmyMatch[6] ? parseInt(dmyMatch[6], 10) : 0;
+    const ampm = dmyMatch[7];
+
+    if (ampm) {
+      if (ampm.toUpperCase() === "PM" && hours < 12) hours += 12;
+      if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
+    }
+
+    return new Date(year, month, day, hours, minutes, seconds);
+  }
+
+  // 2. Try parsing YYYY-MM-DD
+  const ymdMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*(AM|PM))?)?$/i);
+  if (ymdMatch) {
+    const year = parseInt(ymdMatch[1], 10);
+    const month = parseInt(ymdMatch[2], 10) - 1;
+    const day = parseInt(ymdMatch[3], 10);
+    let hours = ymdMatch[4] ? parseInt(ymdMatch[4], 10) : 0;
+    const minutes = ymdMatch[5] ? parseInt(ymdMatch[5], 10) : 0;
+    const seconds = ymdMatch[6] ? parseInt(ymdMatch[6], 10) : 0;
+    const ampm = ymdMatch[7];
+
+    if (ampm) {
+      if (ampm.toUpperCase() === "PM" && hours < 12) hours += 12;
+      if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
+    }
+
+    return new Date(year, month, day, hours, minutes, seconds);
+  }
+
+  // 3. Fallback to native parsing, but clean up time formats first
+  const cleaned = str.replace(/(\d{1,2}):(\d{2})\s?(AM|PM)/i, "$1:$2 $3");
+  const parsed = new Date(cleaned);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 function parseInputDate(value) {
@@ -867,4 +950,26 @@ function csvEscape(value) {
 
 function setNotice(message) {
   els.notice.textContent = message;
+}
+
+function showResetCacheButton(show) {
+  if (els.resetCache) {
+    els.resetCache.style.display = show ? "inline-flex" : "none";
+  }
+}
+
+function highlightSearchTerm(text, needle) {
+  if (!text) return "";
+  if (!needle) return escapeHtml(text);
+  const rawText = String(text);
+  const escapedNeedle = needle.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+  const regex = new RegExp(`(${escapedNeedle})`, "gi");
+  const parts = rawText.split(regex);
+  return parts
+    .map((part, index) => {
+      return index % 2 === 1
+        ? `<mark class="search-highlight">${escapeHtml(part)}</mark>`
+        : escapeHtml(part);
+    })
+    .join("");
 }
