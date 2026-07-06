@@ -1,0 +1,2208 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MounthAnalytic</title>
+    <style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --border: rgba(255, 255, 255, 0.07);
+  --accent: #5b6af0;
+  --accent2: #a78bfa;
+  --accent3: #34d399;
+  --accent4: #fb923c;
+  --accent5: #f43f5e;
+  --text: #e8e8f0;
+  --muted: #6b6b80;
+  --done: #34d399;
+  --review: #fb923c;
+  --progress: #5b6af0;
+  --new: #a78bfa;
+  --critical: #f43f5e;
+  --high: #fb923c;
+  --medium: #5b6af0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Space Grotesk", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(91, 106, 240, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 106, 240, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+label.upload-btn {
+  cursor: pointer;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+header {
+  margin-bottom: 24px;
+  padding: 48px 0 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.logo-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  display: flex;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  box-shadow: 0 0 20px rgba(91, 106, 240, 0.4);
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  margin-top: 3px;
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.date-badge,
+.upload-btn {
+  min-height: 36px;
+  border: 1px solid rgba(91, 106, 240, 0.25);
+  border-radius: 8px;
+  background: rgba(91, 106, 240, 0.1);
+  color: var(--accent2);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+}
+
+.date-badge {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.upload-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px rgba(91, 106, 240, 0.24);
+}
+
+.upload-btn input {
+  display: none;
+}
+
+.control-card {
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(18, 18, 26, 0.88);
+  padding: clamp(16px, 2vw, 20px);
+}
+
+.control-head {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.control-title {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.control-sub {
+  max-width: 680px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-shrink: 0;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 4px;
+}
+
+.tab {
+  min-width: 98px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(91, 106, 240, 0.35);
+}
+
+.tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  align-items: end;
+  gap: 12px 10px;
+}
+
+.filter-group,
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.filter-group.compact {
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.filter-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.filter-btn {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+  border-color: var(--accent);
+  background: rgba(91, 106, 240, 0.08);
+  color: var(--accent);
+}
+
+.filter-btn.all.active {
+  border-color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+.filter-field.search {
+  grid-column: span 2;
+}
+
+select,
+input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #0d0d14;
+  color: var(--text);
+  outline: none;
+  padding: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+select:focus,
+input:focus {
+  border-color: rgba(91, 106, 240, 0.6);
+  box-shadow: 0 0 0 3px rgba(91, 106, 240, 0.12);
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.kpi-card,
+.chart-card,
+.designer-card,
+.insight-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+}
+
+.kpi-card.blue::before {
+  background: var(--accent);
+}
+
+.kpi-card.green::before {
+  background: var(--done);
+}
+
+.kpi-card.orange::before {
+  background: var(--review);
+}
+
+.kpi-card.purple::before {
+  background: var(--accent2);
+}
+
+.kpi-card.red::before {
+  background: var(--critical);
+}
+
+.kpi-label {
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.kpi-value {
+  color: var(--text);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.kpi-value.blue {
+  color: var(--accent);
+}
+
+.kpi-value.green {
+  color: var(--done);
+}
+
+.kpi-value.orange {
+  color: var(--review);
+}
+
+.kpi-value.purple {
+  color: var(--accent2);
+}
+
+.kpi-value.red {
+  color: var(--critical);
+}
+
+.kpi-sub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.chart-card {
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 0;
+}
+
+.chart-title,
+.section-label {
+  margin-bottom: 20px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.section-label {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.chart-note {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.split-block {
+  margin-top: 24px;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bar-row.clickable {
+  margin: -3px -6px;
+  border-radius: 8px;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+
+.bar-row.clickable:hover,
+.bar-row.clickable.active {
+  background: rgba(91, 106, 240, 0.08);
+}
+
+.bar-row.clickable:hover {
+  transform: translateX(2px);
+}
+
+.bar-label {
+  min-width: 160px;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-label.mono {
+  color: var(--accent2);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+}
+
+.bar-wrap {
+  flex: 1;
+  height: 8px;
+  min-width: 60px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bar-fill {
+  height: 100%;
+  min-width: 2px;
+  border-radius: 4px;
+  animation: barGrow 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bar-val {
+  min-width: 34px;
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.timeline-card {
+  margin-bottom: 20px;
+}
+
+.timeline-chart {
+  position: relative;
+  display: flex;
+  height: 140px;
+  align-items: flex-end;
+  gap: 6px;
+  padding-bottom: 24px;
+}
+
+.timeline-bar-wrap {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  min-width: 6px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.timeline-bar {
+  width: 100%;
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--accent);
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline-val,
+.timeline-axis-label {
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+}
+
+.timeline-axis {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+}
+
+.timeline-axis-label {
+  flex: 1;
+  overflow: hidden;
+  text-align: center;
+}
+
+.designer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.designer-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+
+.designer-card:hover,
+.designer-card.active {
+  border-color: rgba(91, 106, 240, 0.42);
+  box-shadow: 0 0 22px rgba(91, 106, 240, 0.14);
+}
+
+.designer-card:hover {
+  transform: translateY(-2px);
+}
+
+.designer-name {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.designer-handle {
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.designer-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.d-stat-val {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.d-stat-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.rank-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rank-1 {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.rank-2 {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.rank-3 {
+  background: rgba(180, 83, 9, 0.15);
+  color: #b45309;
+}
+
+.rank-4,
+.rank-5 {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+}
+
+.team-charts {
+  margin-bottom: 28px;
+}
+
+.designer-detail-card {
+  margin-bottom: 28px;
+}
+
+.detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.detail-name {
+  margin-bottom: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.detail-handle {
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.detail-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mini-metric {
+  min-width: 116px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 10px 12px;
+}
+
+.mini-value {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.mini-label {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.detail-subtitle {
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.task-list {
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.task-pill {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 12px;
+}
+
+.task-pill-id {
+  color: var(--accent2);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+}
+
+.task-pill-main {
+  min-width: 0;
+}
+
+.task-pill-title {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-pill-meta {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.task-pill-qty {
+  color: var(--done);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  border: 1px solid rgba(91, 106, 240, 0.18);
+  border-radius: 20px;
+  background: rgba(91, 106, 240, 0.1);
+  color: var(--accent2);
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.insight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.insight-icon {
+  flex-shrink: 0;
+  font-size: 28px;
+}
+
+.insight-title {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.insight-text {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.insight-text strong {
+  color: var(--text);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.content-card {
+  border: 1px solid rgba(91, 106, 240, 0.15);
+  border-radius: 10px;
+  background: rgba(91, 106, 240, 0.06);
+  padding: 16px;
+}
+
+.content-icon {
+  margin-bottom: 6px;
+  font-size: 22px;
+}
+
+.content-title {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.content-text {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.pattern-list {
+  display: grid;
+  gap: 10px;
+}
+
+.pattern-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+}
+
+.pattern-arrow {
+  flex-shrink: 0;
+  color: var(--accent2);
+  font-size: 18px;
+}
+
+.pattern-title {
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+
+.pattern-text {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-done {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--done);
+}
+
+.badge-review {
+  background: rgba(251, 146, 60, 0.12);
+  color: var(--review);
+}
+
+.badge-progress {
+  background: rgba(91, 106, 240, 0.15);
+  color: var(--accent);
+}
+
+.badge-new {
+  background: rgba(167, 139, 250, 0.12);
+  color: var(--accent2);
+}
+
+.badge-critical {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--critical);
+}
+
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: -8px 0 10px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead tr {
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+th,
+td {
+  padding: 10px 14px;
+}
+
+td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+
+tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.task-id {
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+}
+
+.task-name {
+  max-width: 180px;
+  font-weight: 500;
+}
+
+.geo-text {
+  max-width: 150px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes barGrow {
+  from {
+    width: 0;
+  }
+}
+
+@media (max-width: 1120px) {
+  .control-head {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .tab {
+    flex: 1;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .charts-grid,
+  .insights-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding-inline: 14px;
+  }
+
+  header {
+    padding: 28px 0 22px;
+  }
+
+  .header-actions,
+  .date-badge,
+  .upload-btn {
+    width: 100%;
+  }
+
+  .upload-btn,
+  .date-badge {
+    justify-content: center;
+  }
+
+  .filter-field.search {
+    grid-column: span 1;
+  }
+
+  .filter-group.compact {
+    grid-column: span 1;
+  }
+
+  .filter-buttons {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .bar-row {
+    gap: 8px;
+  }
+
+  .bar-label {
+    min-width: 98px;
+  }
+
+  .chart-card,
+  .kpi-card {
+    padding: 18px;
+  }
+
+  .task-pill {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+
+  .task-pill-qty {
+    grid-column: 2;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-inner">
+          <div class="logo-row">
+            <div class="logo-icon">M</div>
+            <div>
+              <h1 id="reportTitle">MounthAnalytic</h1>
+              <div class="subtitle">Аналітика таблиці · Notion Export</div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <div class="date-badge" id="dateBadge">-</div>
+            <label class="upload-btn">
+              <input id="fileInput" type="file" accept=".csv,text/csv" multiple />
+              Завантажити CSV
+            </label>
+            <button class="upload-btn snapshot-btn" id="snapshotExport" type="button">Зберегти snapshot</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="control-card">
+        <div class="control-head">
+          <div>
+            <div class="control-title">Керування вибіркою</div>
+            <div class="control-sub" id="notice">Завантаження демо-даних...</div>
+          </div>
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="overview">Огляд</button>
+            <button class="tab" data-tab="team">Дизайнера</button>
+            <button class="tab" data-tab="geo">GEO</button>
+            <button class="tab" data-tab="insights">Аналітика</button>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="filter-group compact">
+            <span>Період</span>
+            <div class="filter-buttons" id="rangeMode">
+              <button class="filter-btn all active" data-mode="all">Усе</button>
+              <button class="filter-btn" data-mode="month">Місяць</button>
+              <button class="filter-btn" data-mode="custom">Дні</button>
+            </div>
+          </div>
+          <label class="filter-field">
+            Поле дати
+            <select id="dateField"></select>
+          </label>
+          <label class="filter-field" id="monthWrap" hidden>
+            Місяць
+            <input id="monthInput" type="month" />
+          </label>
+          <label class="filter-field" id="startWrap" hidden>
+            Від
+            <input id="startDate" type="date" />
+          </label>
+          <label class="filter-field" id="endWrap" hidden>
+            До
+            <input id="endDate" type="date" />
+          </label>
+          <label class="filter-field">
+            Дизайнер
+            <select id="designerFilter"></select>
+          </label>
+          <label class="filter-field">
+            Баєр
+            <select id="buyerFilter"></select>
+          </label>
+          <label class="filter-field">
+            Статус
+            <select id="statusFilter"></select>
+          </label>
+          <label class="filter-field">
+            Тип
+            <select id="typeFilter"></select>
+          </label>
+          <label class="filter-field search">
+            Пошук
+            <input id="searchInput" type="search" placeholder="casino, slot, offer..." />
+          </label>
+        </div>
+      </div>
+
+      <main>
+        <section class="section active" id="tab-overview">
+          <div class="kpi-grid" id="overviewKpis"></div>
+
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Пікові дні — навантаження</div>
+              <div class="bar-chart" id="peakDaysChart"></div>
+              <div class="chart-note" id="peakDaysNote"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Формат креативу</div>
+              <div class="bar-chart" id="creativeChart"></div>
+              <div class="split-block">
+                <div class="chart-title">Тип креативу</div>
+                <div class="bar-chart" id="typeChart"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card timeline-card">
+            <div class="chart-title">Активність по днях</div>
+            <div class="timeline-chart" id="timelineChart"></div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Пріоритет тасок</div>
+              <div class="bar-chart" id="priorityChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Статуси</div>
+              <div class="bar-chart" id="statusChart"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="tab-team">
+          <div class="section-label">Дизайнери — кількість тасок та креативів</div>
+          <div class="designer-grid" id="designerCards"></div>
+
+          <div class="charts-grid team-charts">
+            <div class="chart-card">
+              <div class="chart-title">Дизайнери — кількість креативів</div>
+              <div class="bar-chart" id="designerCreativeChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Дизайнери — кількість тасок</div>
+              <div class="bar-chart" id="designerTaskChart"></div>
+            </div>
+          </div>
+
+          <div class="chart-card designer-detail-card" id="designerDetailCard"></div>
+
+          <div class="chart-card">
+            <div class="chart-title">Баєри — замовлення та обсяг</div>
+            <div class="bar-chart" id="buyerChart"></div>
+          </div>
+        </section>
+
+        <section class="section" id="tab-geo">
+          <div class="kpi-grid" id="geoKpis"></div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Топ GEO за к-стю тасок</div>
+              <div class="bar-chart" id="geoTaskChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Топ GEO за к-стю креативів</div>
+              <div class="bar-chart" id="geoCreativeChart"></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Мови креативів</div>
+            <div class="tag-list" id="languageTags"></div>
+          </div>
+        </section>
+
+        <section class="section" id="tab-insights">
+          <div class="insights-grid" id="insightCards"></div>
+
+          <div class="chart-card">
+            <div class="chart-title">Аналіз вмісту тасок — типи контенту</div>
+            <div class="content-grid" id="contentCards"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">Ключові паттерни у завданнях</div>
+            <div class="pattern-list" id="patternList"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">Таблиця задач</div>
+            <div class="table-actions">
+              <button class="filter-btn" id="exportFiltered">Експорт фільтру</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Таска</th>
+                    <th>Дата</th>
+                    <th>Дизайнер</th>
+                    <th>Баєр</th>
+                    <th>К-сть</th>
+                    <th>Статус</th>
+                    <th>GEO</th>
+                  </tr>
+                </thead>
+                <tbody id="taskRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script id="embeddedSnapshot" type="application/json">{"version": 1, "generatedAt": "2026-06-01T09:35:31.410Z", "rowCount": 223, "note": "Demo snapshot. All worker accounts, links, media references, GEO values, language values, task IDs, task texts and personal data were anonymized.", "rows": [{"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-001", "Post": "ID: DEMO-001\nBuyer: Баєр 01\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-001. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 7, 2026 1:30 PM", "Дизайнер": "Дизайнер 01", "К-сть": "15", "Креатив": "Статика", "Мова": "Мова 01", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 02", "Id": "DEMO-002", "Post": "ID: DEMO-002\nBuyer: Баєр 01\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-002. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 8, 2026 12:36 PM", "Дизайнер": "Дизайнер 02", "К-сть": "20", "Креатив": "Статика", "Мова": "Мова 02", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 03", "Id": "DEMO-003", "Post": "ID: DEMO-003\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-003. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 8, 2026 2:59 PM", "Дизайнер": "Дизайнер 03", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 03", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 04", "Id": "DEMO-004", "Post": "ID: DEMO-004\nBuyer: Баєр 03\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-004. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 03", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 8, 2026 3:25 PM", "Дизайнер": "Дизайнер 04", "К-сть": "27", "Креатив": "Статика", "Мова": "Мова 04", "Пріорітет": "Critical", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "GEO 05", "Id": "DEMO-005", "Post": "ID: DEMO-005\nBuyer: Баєр 02\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-005. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 8, 2026 4:43 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 05", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "GEO 05", "Id": "DEMO-006", "Post": "ID: DEMO-006\nBuyer: Баєр 02\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-006. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 8, 2026 5:25 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 05", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-007", "Post": "ID: DEMO-007\nBuyer: Баєр 01\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-007. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 1:11 PM", "Дизайнер": "Дизайнер 01", "К-сть": "20", "Креатив": "Статика", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Plinko демо", "Files & media": "", "GEO": "GEO 07", "Id": "DEMO-008", "Post": "ID: DEMO-008\nBuyer: Баєр 04\nTask: Plinko демо", "Text": "Демо-опис задачі DEMO-008. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 04", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 1:51 PM", "Дизайнер": "Дизайнер 05", "К-сть": "10", "Креатив": "Відео", "Мова": "Мова 07", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "PWA демо", "Files & media": "", "GEO": "", "Id": "DEMO-009", "Post": "ID: DEMO-009\nBuyer: Баєр 05\nTask: PWA демо", "Text": "Демо-опис задачі DEMO-009. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 2:13 PM", "Дизайнер": "Дизайнер 01", "К-сть": "2", "Креатив": "PWA", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "", "Id": "DEMO-010", "Post": "ID: DEMO-010\nBuyer: Баєр 05\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-010. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 2:23 PM", "Дизайнер": "Дизайнер 05", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 011", "Files & media": "", "GEO": "", "Id": "DEMO-011", "Post": "ID: DEMO-011\nBuyer: Баєр 05\nTask: Демо задача 011", "Text": "Демо-опис задачі DEMO-011. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 2:30 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "", "Id": "DEMO-012", "Post": "ID: DEMO-012\nBuyer: Баєр 05\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-012. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 2:35 PM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "", "Id": "DEMO-013", "Post": "ID: DEMO-013\nBuyer: Баєр 05\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-013. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 2:39 PM", "Дизайнер": "Дизайнер 03", "К-сть": "6", "Креатив": "Відео", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "", "Id": "DEMO-014", "Post": "ID: DEMO-014\nBuyer: Баєр 05\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-014. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 2:55 PM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Статика", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "", "Id": "DEMO-015", "Post": "ID: DEMO-015\nBuyer: Баєр 05\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-015. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 2:57 PM", "Дизайнер": "Дизайнер 03", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 016", "Files & media": "", "GEO": "", "Id": "DEMO-016", "Post": "ID: DEMO-016\nBuyer: Баєр 05\nTask: Демо задача 016", "Text": "Демо-опис задачі DEMO-016. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 05", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 3:02 PM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 08", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 08", "Id": "DEMO-017", "Post": "ID: DEMO-017\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-017. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 5:19 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 018", "Files & media": "", "GEO": "GEO 02", "Id": "DEMO-018", "Post": "ID: DEMO-018\nBuyer: Баєр 06\nTask: Демо задача 018", "Text": "Демо-опис задачі DEMO-018. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 9, 2026 9:21 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 02", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 09", "Id": "DEMO-019", "Post": "ID: DEMO-019\nBuyer: Баєр 07\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-019. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 12:39 AM", "Дизайнер": "Дизайнер 02", "К-сть": "10", "Креатив": "Статика", "Мова": "Мова 09", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 10", "Id": "DEMO-020", "Post": "ID: DEMO-020\nBuyer: Баєр 07\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-020. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 2:23 AM", "Дизайнер": "Дизайнер 02", "К-сть": "6", "Креатив": "Статика", "Мова": "", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-021", "Post": "ID: DEMO-021\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-021. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 10:52 AM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 022", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-022", "Post": "ID: DEMO-022\nBuyer: Баєр 06\nTask: Демо задача 022", "Text": "Демо-опис задачі DEMO-022. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 11:21 AM", "Дизайнер": "Дизайнер 01", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Plinko демо", "Files & media": "", "GEO": "GEO 07", "Id": "DEMO-023", "Post": "ID: DEMO-023\nBuyer: Баєр 03\nTask: Plinko демо", "Text": "Демо-опис задачі DEMO-023. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 03", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 1:01 PM", "Дизайнер": "Дизайнер 05", "К-сть": "6", "Креатив": "Відео", "Мова": "Мова 10", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 05", "Id": "DEMO-024", "Post": "ID: DEMO-024\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-024. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 10:42 PM", "Дизайнер": "Дизайнер 05", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 11", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 05", "Id": "DEMO-025", "Post": "ID: DEMO-025\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-025. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 11:01 PM", "Дизайнер": "Дизайнер 05", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 11", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "PWA демо", "Files & media": "", "GEO": "GEO 11", "Id": "DEMO-026", "Post": "ID: DEMO-026\nBuyer: Баєр 02\nTask: PWA демо", "Text": "Демо-опис задачі DEMO-026. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 10, 2026 11:08 PM", "Дизайнер": "Дизайнер 01", "К-сть": "1", "Креатив": "PWA", "Мова": "Мова 12", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 12", "Id": "DEMO-027", "Post": "ID: DEMO-027\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-027. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 12, 2026 4:02 PM", "Дизайнер": "Дизайнер 04", "К-сть": "7", "Креатив": "Відео", "Мова": "Мова 13", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 13", "Id": "DEMO-028", "Post": "ID: DEMO-028\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-028. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 14, 2026 6:14 PM", "Дизайнер": "Дизайнер 03", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 14", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 13", "Id": "DEMO-029", "Post": "ID: DEMO-029\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-029. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "", "Дата видачі": "20/04/2026", "Дата створення": "April 14, 2026 6:32 PM", "Дизайнер": "Дизайнер 03", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 15", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 13", "Id": "DEMO-030", "Post": "ID: DEMO-030\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-030. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 14, 2026 6:36 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-031", "Post": "ID: DEMO-031\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-031. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 15, 2026 4:51 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 032", "Files & media": "", "GEO": "GEO 15", "Id": "DEMO-032", "Post": "ID: DEMO-032\nBuyer: Баєр 04\nTask: Демо задача 032", "Text": "Демо-опис задачі DEMO-032. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 04", "Дата взяття в роботу": "", "Дата видачі": "24/04/2026", "Дата створення": "April 16, 2026 12:43 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-033", "Post": "ID: DEMO-033\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-033. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 16, 2026 1:48 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-034", "Post": "ID: DEMO-034\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-034. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 16, 2026 2:10 PM", "Дизайнер": "Дизайнер 01", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-035", "Post": "ID: DEMO-035\nBuyer: Баєр 01\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-035. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 16, 2026 2:32 PM", "Дизайнер": "Дизайнер 01", "К-сть": "15", "Креатив": "Статика", "Мова": "Мова 01", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 17", "Id": "DEMO-036", "Post": "ID: DEMO-036\nBuyer: Баєр 01\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-036. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 16, 2026 3:20 PM", "Дизайнер": "Дизайнер 02", "К-сть": "12", "Креатив": "Статика", "Мова": "Мова 17", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 037", "Files & media": "", "GEO": "GEO 18", "Id": "DEMO-037", "Post": "ID: DEMO-037\nBuyer: Баєр 01\nTask: Демо задача 037", "Text": "Демо-опис задачі DEMO-037. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 16, 2026 3:59 PM", "Дизайнер": "Дизайнер 01", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16), Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-038", "Post": "ID: DEMO-038\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-038. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 17, 2026 3:30 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "High", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 19", "Id": "DEMO-039", "Post": "ID: DEMO-039\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-039. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 17, 2026 4:56 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "High", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 20", "Id": "DEMO-040", "Post": "ID: DEMO-040\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-040. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 19, 2026 2:20 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 02", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 20", "Id": "DEMO-041", "Post": "ID: DEMO-041\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-041. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "22/04/2026", "Дата створення": "April 19, 2026 2:44 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 19", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 21", "Id": "DEMO-042", "Post": "ID: DEMO-042\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-042. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 19, 2026 6:16 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 21", "Id": "DEMO-043", "Post": "ID: DEMO-043\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-043. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 19, 2026 7:13 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 22", "Id": "DEMO-044", "Post": "ID: DEMO-044\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-044. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 20, 2026 11:41 AM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-045", "Post": "ID: DEMO-045\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-045. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 20, 2026 12:22 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 24", "Id": "DEMO-046", "Post": "ID: DEMO-046\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-046. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "22/04/2026", "Дата створення": "April 20, 2026 12:47 PM", "Дизайнер": "Дизайнер 02", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 13", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-047", "Post": "ID: DEMO-047\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-047. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "23/04/2026", "Дата створення": "April 20, 2026 4:22 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 20", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-048", "Post": "ID: DEMO-048\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-048. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 20, 2026 5:27 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 22", "Id": "DEMO-049", "Post": "ID: DEMO-049\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-049. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "29/04/2026", "Дата створення": "April 20, 2026 5:48 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Дипфейк демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-050", "Post": "ID: DEMO-050\nBuyer: Баєр 08\nTask: Дипфейк демо", "Text": "Демо-опис задачі DEMO-050. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "April 21, 2026 2:21 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-051", "Post": "ID: DEMO-051\nBuyer: Баєр 08\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-051. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "", "Дата видачі": "23/04/2026", "Дата створення": "April 21, 2026 2:27 PM", "Дизайнер": "Дизайнер 01", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 052", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-052", "Post": "ID: DEMO-052\nBuyer: Баєр 01\nTask: Демо задача 052", "Text": "Демо-опис задачі DEMO-052. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "24/04/2026", "Дата створення": "April 22, 2026 11:57 AM", "Дизайнер": "Дизайнер 02", "К-сть": "10", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 25", "Id": "DEMO-053", "Post": "ID: DEMO-053\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-053. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "", "Дата видачі": "23/04/2026", "Дата створення": "April 22, 2026 4:04 PM", "Дизайнер": "Дизайнер 05", "К-сть": "7", "Креатив": "Відео", "Мова": "Мова 21", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "PWA демо", "Files & media": "", "GEO": "", "Id": "DEMO-054", "Post": "ID: DEMO-054\nBuyer: Баєр 02\nTask: PWA демо", "Text": "Демо-опис задачі DEMO-054. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "24/04/2026", "Дата створення": "April 23, 2026 8:30 AM", "Дизайнер": "Дизайнер 01", "К-сть": "1", "Креатив": "PWA", "Мова": "Мова 12", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "-"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-055", "Post": "ID: DEMO-055\nBuyer: Баєр 06\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-055. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "27/04/2026", "Дата створення": "April 23, 2026 4:51 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 22", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-056", "Post": "ID: DEMO-056\nBuyer: Баєр 07\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-056. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "27/04/2026", "Дата створення": "April 23, 2026 5:46 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 23", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "", "Id": "DEMO-057", "Post": "ID: DEMO-057\nBuyer: Баєр 07\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-057. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "27/04/2026", "Дата створення": "April 23, 2026 7:06 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-058", "Post": "ID: DEMO-058\nBuyer: Баєр 06\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-058. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "27/04/2026", "Дата створення": "April 23, 2026 7:17 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 22", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-059", "Post": "ID: DEMO-059\nBuyer: Баєр 06\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-059. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "28/04/2026", "Дата створення": "April 23, 2026 7:57 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 22", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 060", "Files & media": "", "GEO": "", "Id": "DEMO-060", "Post": "ID: DEMO-060\nBuyer: Баєр 07\nTask: Демо задача 060", "Text": "Демо-опис задачі DEMO-060. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "28/04/2026", "Дата створення": "April 23, 2026 8:06 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "PWA демо", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-061", "Post": "ID: DEMO-061\nBuyer: Баєр 07\nTask: PWA демо", "Text": "Демо-опис задачі DEMO-061. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "27/04/2026", "Дата створення": "April 23, 2026 9:12 PM", "Дизайнер": "Дизайнер 01", "К-сть": "2", "Креатив": "PWA", "Мова": "Мова 23", "Пріорітет": "High", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 062", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-062", "Post": "ID: DEMO-062\nBuyer: Баєр 07\nTask: Демо задача 062", "Text": "Демо-опис задачі DEMO-062. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "27/04/2026", "Дата створення": "April 23, 2026 10:34 PM", "Дизайнер": "Дизайнер 02", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 23", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 063", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-063", "Post": "ID: DEMO-063\nBuyer: Баєр 06\nTask: Демо задача 063", "Text": "Демо-опис задачі DEMO-063. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "27/04/2026", "Дата створення": "April 24, 2026 5:29 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Plinko демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-064", "Post": "ID: DEMO-064\nBuyer: Баєр 06\nTask: Plinko демо", "Text": "Демо-опис задачі DEMO-064. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "29/04/2026", "Дата створення": "April 24, 2026 5:50 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "", "Id": "DEMO-065", "Post": "ID: DEMO-065\nBuyer: Баєр 07\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-065. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 07", "Дата взяття в роботу": "", "Дата видачі": "29/04/2026", "Дата створення": "April 26, 2026 1:21 AM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 066", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-066", "Post": "ID: DEMO-066\nBuyer: Баєр 06\nTask: Демо задача 066", "Text": "Демо-опис задачі DEMO-066. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "28/04/2026", "Дата створення": "April 26, 2026 9:19 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 22", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 067", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-067", "Post": "ID: DEMO-067\nBuyer: Баєр 06\nTask: Демо задача 067", "Text": "Демо-опис задачі DEMO-067. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "29/04/2026", "Дата створення": "April 26, 2026 9:20 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 22", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 068", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-068", "Post": "ID: DEMO-068\nBuyer: Баєр 06\nTask: Демо задача 068", "Text": "Демо-опис задачі DEMO-068. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "28/04/2026", "Дата створення": "April 26, 2026 10:28 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 22", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 26", "Id": "DEMO-069", "Post": "ID: DEMO-069\nBuyer: Баєр 04\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-069. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 04", "Дата взяття в роботу": "", "Дата видачі": "29/04/2026", "Дата створення": "April 27, 2026 6:56 PM", "Дизайнер": "Дизайнер 01", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 22", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-070", "Post": "ID: DEMO-070\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-070. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "30/04/2026", "Дата створення": "April 27, 2026 7:35 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 27", "Id": "DEMO-071", "Post": "ID: DEMO-071\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-071. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "30/04/2026", "Дата створення": "April 28, 2026 12:54 PM", "Дизайнер": "Дизайнер 05", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 13", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 27", "Id": "DEMO-072", "Post": "ID: DEMO-072\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-072. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "30/04/2026", "Дата створення": "April 28, 2026 2:10 PM", "Дизайнер": "Дизайнер 02", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 13", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 27", "Id": "DEMO-073", "Post": "ID: DEMO-073\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-073. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "01/05/2026", "Дата створення": "April 28, 2026 2:15 PM", "Дизайнер": "Дизайнер 04", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 13", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-074", "Post": "ID: DEMO-074\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-074. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "01/05/2026", "Дата створення": "April 28, 2026 4:18 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Plinko демо", "Files & media": "", "GEO": "GEO 07", "Id": "DEMO-075", "Post": "ID: DEMO-075\nBuyer: Баєр 03\nTask: Plinko демо", "Text": "Демо-опис задачі DEMO-075. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 03", "Дата взяття в роботу": "", "Дата видачі": "04/05/2026", "Дата створення": "April 29, 2026 12:34 PM", "Дизайнер": "Дизайнер 05", "К-сть": "6", "Креатив": "Відео", "Мова": "Мова 24", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-076", "Post": "ID: DEMO-076\nBuyer: Баєр 01\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-076. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "", "Дата видачі": "30/04/2026", "Дата створення": "April 29, 2026 2:06 PM", "Дизайнер": "Дизайнер 01", "К-сть": "21", "Креатив": "Статика", "Мова": "Мова 01", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-077", "Post": "ID: DEMO-077\nBuyer: Баєр 09\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-077. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "", "Дата видачі": "01/05/2026", "Дата створення": "April 29, 2026 9:38 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 07", "Id": "DEMO-078", "Post": "ID: DEMO-078\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-078. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "", "Дата видачі": "04/05/2026", "Дата створення": "April 30, 2026 1:23 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 24", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-079", "Post": "ID: DEMO-079\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-079. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "", "Дата видачі": "05/05/2026", "Дата створення": "April 30, 2026 1:37 PM", "Дизайнер": "Дизайнер 04", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 07", "Id": "DEMO-080", "Post": "ID: DEMO-080\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-080. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "", "Дата видачі": "04/05/2026", "Дата створення": "April 30, 2026 3:48 PM", "Дизайнер": "Дизайнер 02", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 24", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-081", "Post": "ID: DEMO-081\nBuyer: Баєр 09\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-081. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "", "Дата видачі": "05/05/2026", "Дата створення": "April 30, 2026 4:33 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 28", "Id": "DEMO-082", "Post": "ID: DEMO-082\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-082. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "05/05/2026", "Дата створення": "May 1, 2026 3:57 PM", "Дизайнер": "Дизайнер 02", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 25", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 28", "Id": "DEMO-083", "Post": "ID: DEMO-083\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-083. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "05/05/2026", "Дата створення": "May 1, 2026 4:11 PM", "Дизайнер": "Дизайнер 02", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 25", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 28", "Id": "DEMO-084", "Post": "ID: DEMO-084\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-084. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "", "Дата видачі": "04/05/2026", "Дата створення": "May 1, 2026 4:25 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 25", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-085", "Post": "ID: DEMO-085\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-085. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "05/05/2026", "Дата створення": "May 1, 2026 4:37 PM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-086", "Post": "ID: DEMO-086\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-086. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "", "Дата видачі": "06/05/2026", "Дата створення": "May 3, 2026 2:30 PM", "Дизайнер": "Дизайнер 05", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-087", "Post": "ID: DEMO-087\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-087. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "", "Дата видачі": "06/05/2026", "Дата створення": "May 3, 2026 2:35 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-088", "Post": "ID: DEMO-088\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-088. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "", "Дата видачі": "06/05/2026", "Дата створення": "May 3, 2026 2:41 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-089", "Post": "ID: DEMO-089\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-089. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "05/05/2026", "Дата створення": "May 3, 2026 2:52 PM", "Дизайнер": "Дизайнер 01", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 090", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-090", "Post": "ID: DEMO-090\nBuyer: Баєр 06\nTask: Демо задача 090", "Text": "Демо-опис задачі DEMO-090. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "06/05/2026", "Дата створення": "May 3, 2026 5:53 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Слот демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-091", "Post": "ID: DEMO-091\nBuyer: Баєр 06\nTask: Слот демо", "Text": "Демо-опис задачі DEMO-091. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 3, 2026 9:36 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 092", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-092", "Post": "ID: DEMO-092\nBuyer: Баєр 06\nTask: Демо задача 092", "Text": "Демо-опис задачі DEMO-092. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 3, 2026 9:36 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 093", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-093", "Post": "ID: DEMO-093\nBuyer: Баєр 06\nTask: Демо задача 093", "Text": "Демо-опис задачі DEMO-093. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 3, 2026 9:37 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16), Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 094", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-094", "Post": "ID: DEMO-094\nBuyer: Баєр 06\nTask: Демо задача 094", "Text": "Демо-опис задачі DEMO-094. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "08/05/2026", "Дата створення": "May 3, 2026 9:38 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Plinko демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-095", "Post": "ID: DEMO-095\nBuyer: Баєр 06\nTask: Plinko демо", "Text": "Демо-опис задачі DEMO-095. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 3, 2026 9:38 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 29", "Id": "DEMO-096", "Post": "ID: DEMO-096\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-096. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 5, 2026 11:31 AM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 29", "Id": "DEMO-097", "Post": "ID: DEMO-097\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-097. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 5, 2026 11:37 AM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-098", "Post": "ID: DEMO-098\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-098. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "08/05/2026", "Дата створення": "May 5, 2026 11:43 AM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 26", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 28", "Id": "DEMO-099", "Post": "ID: DEMO-099\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-099. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 5, 2026 12:18 PM", "Дизайнер": "Дизайнер 02", "К-сть": "3", "Креатив": "Відео", "Мова": "", "Пріорітет": "Medium", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 28", "Id": "DEMO-100", "Post": "ID: DEMO-100\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-100. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 5, 2026 12:20 PM", "Дизайнер": "Дизайнер 03", "К-сть": "3", "Креатив": "Відео", "Мова": "", "Пріорітет": "Medium", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-101", "Post": "ID: DEMO-101\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-101. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "08/05/2026", "Дата створення": "May 5, 2026 12:24 PM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 27", "Пріорітет": "Medium", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 30", "Id": "DEMO-102", "Post": "ID: DEMO-102\nBuyer: Баєр 04\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-102. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 04", "Дата взяття в роботу": "", "Дата видачі": "05/05/2026", "Дата створення": "May 5, 2026 12:48 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 28", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 28", "Id": "DEMO-103", "Post": "ID: DEMO-103\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-103. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "", "Дата видачі": "07/05/2026", "Дата створення": "May 5, 2026 2:04 PM", "Дизайнер": "Дизайнер 04", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 29", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-104", "Post": "ID: DEMO-104\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-104. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "11/05/2026", "Дата створення": "May 6, 2026 12:47 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-105", "Post": "ID: DEMO-105\nBuyer: Баєр 01\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-105. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 6, 2026 3:03 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 106", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-106", "Post": "ID: DEMO-106\nBuyer: Баєр 01\nTask: Демо задача 106", "Text": "Демо-опис задачі DEMO-106. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "08/05/2026", "Дата створення": "May 6, 2026 3:16 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 28", "Id": "DEMO-107", "Post": "ID: DEMO-107\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-107. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "11/05/2026", "Дата створення": "May 6, 2026 4:30 PM", "Дизайнер": "Дизайнер 02", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 25", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-108", "Post": "ID: DEMO-108\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-108. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "11/05/2026", "Дата створення": "May 6, 2026 4:46 PM", "Дизайнер": "Дизайнер 05", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-109", "Post": "ID: DEMO-109\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-109. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 6, 2026 5:32 PM", "Дизайнер": "Дизайнер 03", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "PWA демо", "Files & media": "", "GEO": "GEO 11", "Id": "DEMO-110", "Post": "ID: DEMO-110\nBuyer: Баєр 02\nTask: PWA демо", "Text": "Демо-опис задачі DEMO-110. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 6, 2026 5:34 PM", "Дизайнер": "Дизайнер 02", "К-сть": "", "Креатив": "PWA", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 31", "Id": "DEMO-111", "Post": "ID: DEMO-111\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-111. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 6, 2026 7:44 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 30", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 112", "Files & media": "", "GEO": "GEO 31", "Id": "DEMO-112", "Post": "ID: DEMO-112\nBuyer: Баєр 06\nTask: Демо задача 112", "Text": "Демо-опис задачі DEMO-112. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "11/05/2026", "Дата створення": "May 6, 2026 8:30 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 30", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 113", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-113", "Post": "ID: DEMO-113\nBuyer: Баєр 01\nTask: Демо задача 113", "Text": "Демо-опис задачі DEMO-113. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "08/05/2026", "Дата видачі": "11/05/2026", "Дата створення": "May 7, 2026 12:44 PM", "Дизайнер": "Дизайнер 05", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "PWA демо", "Files & media": "", "GEO": "GEO 11", "Id": "DEMO-114", "Post": "ID: DEMO-114\nBuyer: Баєр 02\nTask: PWA демо", "Text": "Демо-опис задачі DEMO-114. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 7, 2026 1:52 PM", "Дизайнер": "Дизайнер 02", "К-сть": "", "Креатив": "PWA", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-115", "Post": "ID: DEMO-115\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-115. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 7, 2026 2:53 PM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-116", "Post": "ID: DEMO-116\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-116. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "13/05/2026", "Дата створення": "May 7, 2026 3:38 PM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-117", "Post": "ID: DEMO-117\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-117. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 7, 2026 4:29 PM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 21", "Id": "DEMO-118", "Post": "ID: DEMO-118\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-118. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "12/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 7, 2026 4:39 PM", "Дизайнер": "Дизайнер 01", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 32", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-119", "Post": "ID: DEMO-119\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-119. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "12/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 7, 2026 4:41 PM", "Дизайнер": "Дизайнер 02", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 21", "Id": "DEMO-120", "Post": "ID: DEMO-120\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-120. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "13/05/2026", "Дата створення": "May 7, 2026 5:02 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 32", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 32", "Id": "DEMO-121", "Post": "ID: DEMO-121\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-121. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 8, 2026 1:10 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 33", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 33", "Id": "DEMO-122", "Post": "ID: DEMO-122\nBuyer: Баєр 11\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-122. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 11", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "13/05/2026", "Дата створення": "May 8, 2026 5:25 PM", "Дизайнер": "Дизайнер 05", "К-сть": "21", "Креатив": "Статика", "Мова": "Мова 34", "Пріорітет": "Medium", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-123", "Post": "ID: DEMO-123\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-123. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 8, 2026 5:33 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-124", "Post": "ID: DEMO-124\nBuyer: Баєр 11\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-124. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 11", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 8, 2026 10:41 PM", "Дизайнер": "Дизайнер 05", "К-сть": "18", "Креатив": "Статика", "Мова": "Мова 35", "Пріорітет": "Medium", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 19", "Id": "DEMO-125", "Post": "ID: DEMO-125\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-125. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 9, 2026 5:17 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 19", "Id": "DEMO-126", "Post": "ID: DEMO-126\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-126. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 9, 2026 6:38 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 19", "Id": "DEMO-127", "Post": "ID: DEMO-127\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-127. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 9, 2026 6:38 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 128", "Files & media": "", "GEO": "GEO 29", "Id": "DEMO-128", "Post": "ID: DEMO-128\nBuyer: Баєр 06\nTask: Демо задача 128", "Text": "Демо-опис задачі DEMO-128. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 11, 2026 9:30 AM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "-", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "-"}, {"Таска": "Демо задача 129", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-129", "Post": "ID: DEMO-129\nBuyer: Баєр 01\nTask: Демо задача 129", "Text": "Демо-опис задачі DEMO-129. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 11, 2026 3:03 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-130", "Post": "ID: DEMO-130\nBuyer: Баєр 01\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-130. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 11, 2026 3:21 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 34", "Id": "DEMO-131", "Post": "ID: DEMO-131\nBuyer: Баєр 12\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-131. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 12", "Дата взяття в роботу": "11/05/2026", "Дата видачі": "12/05/2026", "Дата створення": "May 11, 2026 4:24 PM", "Дизайнер": "Дизайнер 01", "К-сть": "38", "Креатив": "Статика", "Мова": "", "Пріорітет": "Critical", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 29", "Id": "DEMO-132", "Post": "ID: DEMO-132\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-132. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "15/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 11, 2026 4:49 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 133", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-133", "Post": "ID: DEMO-133\nBuyer: Баєр 06\nTask: Демо задача 133", "Text": "Демо-опис задачі DEMO-133. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "15/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 11, 2026 5:19 PM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-134", "Post": "ID: DEMO-134\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-134. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 11, 2026 7:17 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-135", "Post": "ID: DEMO-135\nBuyer: Баєр 10\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-135. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "15/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 11, 2026 8:29 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-136", "Post": "ID: DEMO-136\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-136. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "15/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 11, 2026 8:33 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 35", "Id": "DEMO-137", "Post": "ID: DEMO-137\nBuyer: Баєр 01\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-137. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "13/05/2026", "Дата створення": "May 12, 2026 12:58 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-138", "Post": "ID: DEMO-138\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-138. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 12, 2026 1:32 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 20", "Id": "DEMO-139", "Post": "ID: DEMO-139\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-139. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 12, 2026 1:43 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 36", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-140", "Post": "ID: DEMO-140\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-140. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 12, 2026 2:10 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Ютуб(16:9)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 34", "Id": "DEMO-141", "Post": "ID: DEMO-141\nBuyer: Баєр 12\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-141. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 12", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 12, 2026 3:15 PM", "Дизайнер": "Дизайнер 01", "К-сть": "171", "Креатив": "Статика", "Мова": "Мова 37", "Пріорітет": "Critical", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 35", "Id": "DEMO-142", "Post": "ID: DEMO-142\nBuyer: Баєр 01\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-142. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "13/05/2026", "Дата створення": "May 12, 2026 3:33 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 35", "Id": "DEMO-143", "Post": "ID: DEMO-143\nBuyer: Баєр 01\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-143. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "13/05/2026", "Дата створення": "May 12, 2026 3:40 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 33", "Id": "DEMO-144", "Post": "ID: DEMO-144\nBuyer: Баєр 11\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-144. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 11", "Дата взяття в роботу": "13/05/2026", "Дата видачі": "13/05/2026", "Дата створення": "May 12, 2026 4:19 PM", "Дизайнер": "Дизайнер 05", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 34", "Пріорітет": "Medium", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-145", "Post": "ID: DEMO-145\nBuyer: Баєр 11\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-145. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 11", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 12, 2026 4:19 PM", "Дизайнер": "Дизайнер 05", "К-сть": "9", "Креатив": "-", "Мова": "Мова 35", "Пріорітет": "Medium", "Розмір": "Портрет(3:4)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-146", "Post": "ID: DEMO-146\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-146. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "14/05/2026", "Дата видачі": "14/05/2026", "Дата створення": "May 13, 2026 12:06 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 147", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-147", "Post": "ID: DEMO-147\nBuyer: Баєр 06\nTask: Демо задача 147", "Text": "Демо-опис задачі DEMO-147. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 13, 2026 12:11 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 148", "Files & media": "", "GEO": "GEO 36", "Id": "DEMO-148", "Post": "ID: DEMO-148\nBuyer: Баєр 06\nTask: Демо задача 148", "Text": "Демо-опис задачі DEMO-148. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 13, 2026 12:40 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 17", "Пріорітет": "High", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 29", "Id": "DEMO-149", "Post": "ID: DEMO-149\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-149. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 13, 2026 12:41 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 150", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-150", "Post": "ID: DEMO-150\nBuyer: Баєр 06\nTask: Демо задача 150", "Text": "Демо-опис задачі DEMO-150. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 13, 2026 2:03 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 151", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-151", "Post": "ID: DEMO-151\nBuyer: Баєр 06\nTask: Демо задача 151", "Text": "Демо-опис задачі DEMO-151. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 13, 2026 3:08 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 152", "Files & media": "", "GEO": "GEO 18", "Id": "DEMO-152", "Post": "ID: DEMO-152\nBuyer: Баєр 06\nTask: Демо задача 152", "Text": "Демо-опис задачі DEMO-152. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 13, 2026 3:08 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 37", "Id": "DEMO-153", "Post": "ID: DEMO-153\nBuyer: Баєр 09\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-153. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "18/05/2026", "Дата видачі": "18/05/2026", "Дата створення": "May 14, 2026 12:29 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 37", "Id": "DEMO-154", "Post": "ID: DEMO-154\nBuyer: Баєр 09\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-154. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 14, 2026 12:41 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 37", "Id": "DEMO-155", "Post": "ID: DEMO-155\nBuyer: Баєр 09\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-155. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 14, 2026 12:55 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 156", "Files & media": "", "GEO": "GEO 38", "Id": "DEMO-156", "Post": "ID: DEMO-156\nBuyer: Баєр 01\nTask: Демо задача 156", "Text": "Демо-опис задачі DEMO-156. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 14, 2026 3:52 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 35", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 157", "Files & media": "", "GEO": "GEO 38", "Id": "DEMO-157", "Post": "ID: DEMO-157\nBuyer: Баєр 01\nTask: Демо задача 157", "Text": "Демо-опис задачі DEMO-157. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 14, 2026 4:10 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 35", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 158", "Files & media": "", "GEO": "GEO 35", "Id": "DEMO-158", "Post": "ID: DEMO-158\nBuyer: Баєр 01\nTask: Демо задача 158", "Text": "Демо-опис задачі DEMO-158. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "20/05/2026", "Дата створення": "May 14, 2026 4:21 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "High", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 159", "Files & media": "", "GEO": "GEO 35", "Id": "DEMO-159", "Post": "ID: DEMO-159\nBuyer: Баєр 01\nTask: Демо задача 159", "Text": "Демо-опис задачі DEMO-159. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "20/05/2026", "Дата створення": "May 14, 2026 4:28 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "High", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Новина демо", "Files & media": "", "GEO": "GEO 20", "Id": "DEMO-160", "Post": "ID: DEMO-160\nBuyer: Баєр 06\nTask: Новина демо", "Text": "Демо-опис задачі DEMO-160. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 15, 2026 10:44 AM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 38", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-161", "Post": "ID: DEMO-161\nBuyer: Баєр 01\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-161. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "15/05/2026", "Дата видачі": "15/05/2026", "Дата створення": "May 15, 2026 2:18 PM", "Дизайнер": "Дизайнер 01", "К-сть": "8", "Креатив": "Статика", "Мова": "Мова 35", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-162", "Post": "ID: DEMO-162\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-162. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 16, 2026 9:00 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 11", "Id": "DEMO-163", "Post": "ID: DEMO-163\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-163. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 17, 2026 11:13 AM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 39", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-164", "Post": "ID: DEMO-164\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-164. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 17, 2026 1:27 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-165", "Post": "ID: DEMO-165\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-165. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 17, 2026 5:17 PM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 39", "Id": "DEMO-166", "Post": "ID: DEMO-166\nBuyer: Баєр 02\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-166. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 17, 2026 10:32 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 40", "Id": "DEMO-167", "Post": "ID: DEMO-167\nBuyer: Баєр 02\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-167. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 17, 2026 10:41 PM", "Дизайнер": "Дизайнер 03", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 11", "Id": "DEMO-168", "Post": "ID: DEMO-168\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-168. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "20/05/2026", "Дата створення": "May 18, 2026 10:22 AM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 41", "Id": "DEMO-169", "Post": "ID: DEMO-169\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-169. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "20/05/2026", "Дата створення": "May 18, 2026 10:52 AM", "Дизайнер": "Дизайнер 04", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-170", "Post": "ID: DEMO-170\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-170. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "20/05/2026", "Дата створення": "May 18, 2026 1:46 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 171", "Files & media": "", "GEO": "GEO 42", "Id": "DEMO-171", "Post": "ID: DEMO-171\nBuyer: Баєр 01\nTask: Демо задача 171", "Text": "Демо-опис задачі DEMO-171. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "20/05/2026", "Дата створення": "May 18, 2026 2:25 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 172", "Files & media": "", "GEO": "GEO 42", "Id": "DEMO-172", "Post": "ID: DEMO-172\nBuyer: Баєр 01\nTask: Демо задача 172", "Text": "Демо-опис задачі DEMO-172. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "19/05/2026", "Дата видачі": "19/05/2026", "Дата створення": "May 18, 2026 2:42 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Critical", "Розмір": "", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-173", "Post": "ID: DEMO-173\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-173. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "20/05/2026", "Дата створення": "May 18, 2026 3:36 PM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 40", "Id": "DEMO-174", "Post": "ID: DEMO-174\nBuyer: Баєр 02\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-174. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "20/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 18, 2026 4:09 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 40", "Id": "DEMO-175", "Post": "ID: DEMO-175\nBuyer: Баєр 02\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-175. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "21/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 18, 2026 5:11 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 176", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-176", "Post": "ID: DEMO-176\nBuyer: Баєр 06\nTask: Демо задача 176", "Text": "Демо-опис задачі DEMO-176. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "21/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 19, 2026 9:58 AM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 177", "Files & media": "", "GEO": "GEO 43", "Id": "DEMO-177", "Post": "ID: DEMO-177\nBuyer: Баєр 04\nTask: Демо задача 177", "Text": "Демо-опис задачі DEMO-177. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 04", "Дата взяття в роботу": "22/05/2026", "Дата видачі": "22/05/2026", "Дата створення": "May 19, 2026 2:02 PM", "Дизайнер": "Дизайнер 05", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 40", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 178", "Files & media": "", "GEO": "GEO 43", "Id": "DEMO-178", "Post": "ID: DEMO-178\nBuyer: Баєр 04\nTask: Демо задача 178", "Text": "Демо-опис задачі DEMO-178. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 04", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 19, 2026 2:08 PM", "Дизайнер": "Дизайнер 05", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 179", "Files & media": "", "GEO": "GEO 43", "Id": "DEMO-179", "Post": "ID: DEMO-179\nBuyer: Баєр 04\nTask: Демо задача 179", "Text": "Демо-опис задачі DEMO-179. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 04", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "27/05/2026", "Дата створення": "May 19, 2026 2:17 PM", "Дизайнер": "Дизайнер 05", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-180", "Post": "ID: DEMO-180\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-180. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "22/05/2026", "Дата видачі": "22/05/2026", "Дата створення": "May 19, 2026 3:50 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-181", "Post": "ID: DEMO-181\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-181. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "21/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 19, 2026 4:40 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 41", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-182", "Post": "ID: DEMO-182\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-182. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "21/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 19, 2026 6:25 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "Статика", "Мова": "Мова 02", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 183", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-183", "Post": "ID: DEMO-183\nBuyer: Баєр 06\nTask: Демо задача 183", "Text": "Демо-опис задачі DEMO-183. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "21/05/2026", "Дата видачі": "21/05/2026", "Дата створення": "May 19, 2026 7:01 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 02", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 42", "Id": "DEMO-184", "Post": "ID: DEMO-184\nBuyer: Баєр 01\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-184. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "22/05/2026", "Дата видачі": "22/05/2026", "Дата створення": "May 20, 2026 1:15 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 44", "Id": "DEMO-185", "Post": "ID: DEMO-185\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-185. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "21/05/2026", "Дата видачі": "22/05/2026", "Дата створення": "May 20, 2026 3:37 PM", "Дизайнер": "Дизайнер 02", "К-сть": "3", "Креатив": "Відео", "Мова": "", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-186", "Post": "ID: DEMO-186\nBuyer: Баєр 10\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-186. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 21, 2026 6:57 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-187", "Post": "ID: DEMO-187\nBuyer: Баєр 10\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-187. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 21, 2026 7:28 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 07", "Id": "DEMO-188", "Post": "ID: DEMO-188\nBuyer: Баєр 10\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-188. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 21, 2026 7:59 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 24", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 189", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-189", "Post": "ID: DEMO-189\nBuyer: Баєр 01\nTask: Демо задача 189", "Text": "Демо-опис задачі DEMO-189. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 01", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "25/05/2026", "Дата створення": "May 22, 2026 1:58 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Critical", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-190", "Post": "ID: DEMO-190\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-190. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 22, 2026 3:02 PM", "Дизайнер": "Дизайнер 04", "К-сть": "3", "Креатив": "Відео", "Мова": "", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-191", "Post": "ID: DEMO-191\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-191. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "25/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 22, 2026 3:04 PM", "Дизайнер": "Дизайнер 03", "К-сть": "3", "Креатив": "Відео", "Мова": "", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-192", "Post": "ID: DEMO-192\nBuyer: Баєр 08\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-192. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "26/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 22, 2026 3:10 PM", "Дизайнер": "Дизайнер 03", "К-сть": "3", "Креатив": "Відео", "Мова": "", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-193", "Post": "ID: DEMO-193\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-193. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "29/05/2026", "Дата видачі": "", "Дата створення": "May 23, 2026 6:09 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Перевірка", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 194", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-194", "Post": "ID: DEMO-194\nBuyer: Баєр 06\nTask: Демо задача 194", "Text": "Демо-опис задачі DEMO-194. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 23, 2026 8:05 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Ігровий креатив демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-195", "Post": "ID: DEMO-195\nBuyer: Баєр 06\nTask: Ігровий креатив демо", "Text": "Демо-опис задачі DEMO-195. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "01/06/2026", "Дата видачі": "", "Дата створення": "May 23, 2026 8:18 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "В процесі", "Тип креатива:": "з нуля"}, {"Таска": "Демо задача 196", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-196", "Post": "ID: DEMO-196\nBuyer: Баєр 06\nTask: Демо задача 196", "Text": "Демо-опис задачі DEMO-196. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "May 24, 2026 12:51 AM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Нова таска", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-197", "Post": "ID: DEMO-197\nBuyer: Баєр 09\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-197. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "26/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 24, 2026 10:38 AM", "Дизайнер": "Дизайнер 05", "К-сть": "4", "Креатив": "Статика", "Мова": "Мова 06", "Пріорітет": "Critical", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 45", "Id": "DEMO-198", "Post": "ID: DEMO-198\nBuyer: Баєр 09\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-198. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "26/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 25, 2026 12:46 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Статика", "Мова": "Мова 42", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 45", "Id": "DEMO-199", "Post": "ID: DEMO-199\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-199. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "", "Дата видачі": "27/05/2026", "Дата створення": "May 25, 2026 12:52 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 42", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 45", "Id": "DEMO-200", "Post": "ID: DEMO-200\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-200. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "", "Дата видачі": "27/05/2026", "Дата створення": "May 25, 2026 12:55 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 42", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 45", "Id": "DEMO-201", "Post": "ID: DEMO-201\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-201. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "26/05/2026", "Дата видачі": "26/05/2026", "Дата створення": "May 25, 2026 12:59 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 42", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 202", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-202", "Post": "ID: DEMO-202\nBuyer: Баєр 08\nTask: Демо задача 202", "Text": "Демо-опис задачі DEMO-202. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 08", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "27/05/2026", "Дата створення": "May 25, 2026 2:04 PM", "Дизайнер": "Дизайнер 03", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 27", "Пріорітет": "Medium", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-203", "Post": "ID: DEMO-203\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-203. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "27/05/2026", "Дата створення": "May 25, 2026 3:36 PM", "Дизайнер": "Дизайнер 05", "К-сть": "4", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 01", "Id": "DEMO-204", "Post": "ID: DEMO-204\nBuyer: Баєр 09\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-204. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "", "Дата створення": "May 25, 2026 3:39 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Статика", "Мова": "Мова 16", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 46", "Id": "DEMO-205", "Post": "ID: DEMO-205\nBuyer: Баєр 09\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-205. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "", "Дата створення": "May 25, 2026 3:42 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Статика", "Мова": "Мова 43", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 46", "Id": "DEMO-206", "Post": "ID: DEMO-206\nBuyer: Баєр 09\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-206. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 09", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "", "Дата створення": "May 25, 2026 3:45 PM", "Дизайнер": "Дизайнер 05", "К-сть": "1", "Креатив": "Відео", "Мова": "Мова 43", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 23", "Id": "DEMO-207", "Post": "ID: DEMO-207\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-207. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 25, 2026 10:19 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 44", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-208", "Post": "ID: DEMO-208\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-208. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 25, 2026 10:20 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 36", "Id": "DEMO-209", "Post": "ID: DEMO-209\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-209. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 25, 2026 10:21 PM", "Дизайнер": "Дизайнер 04", "К-сть": "1", "Креатив": "Статика", "Мова": "Мова 17", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 16", "Id": "DEMO-210", "Post": "ID: DEMO-210\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-210. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 25, 2026 10:21 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 14", "Id": "DEMO-211", "Post": "ID: DEMO-211\nBuyer: Баєр 06\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-211. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 25, 2026 10:21 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 34", "Id": "DEMO-212", "Post": "ID: DEMO-212\nBuyer: Баєр 12\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-212. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 12", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "", "Дата створення": "May 27, 2026 2:10 PM", "Дизайнер": "Дизайнер 01", "К-сть": "75", "Креатив": "Статика", "Мова": "Мова 45", "Пріорітет": "High", "Розмір": "-", "Статус таски": "Виконано", "Тип креатива:": "з нуля"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-213", "Post": "ID: DEMO-213\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-213. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 27, 2026 3:16 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-214", "Post": "ID: DEMO-214\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-214. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 27, 2026 3:22 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-215", "Post": "ID: DEMO-215\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-215. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 27, 2026 3:27 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 06", "Id": "DEMO-216", "Post": "ID: DEMO-216\nBuyer: Баєр 10\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-216. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "27/05/2026", "Дата видачі": "28/05/2026", "Дата створення": "May 27, 2026 3:35 PM", "Дизайнер": "Дизайнер 03", "К-сть": "5", "Креатив": "Відео", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Виконано", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 40", "Id": "DEMO-217", "Post": "ID: DEMO-217\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-217. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "29/05/2026", "Дата створення": "May 28, 2026 1:53 PM", "Дизайнер": "Дизайнер 05", "К-сть": "3", "Креатив": "Відео", "Мова": "Мова 31", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "В процесі", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 11", "Id": "DEMO-218", "Post": "ID: DEMO-218\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-218. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "29/05/2026", "Дата створення": "May 28, 2026 1:58 PM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "Перевірка", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 11", "Id": "DEMO-219", "Post": "ID: DEMO-219\nBuyer: Баєр 02\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-219. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 02", "Дата взяття в роботу": "28/05/2026", "Дата видачі": "01/06/2026", "Дата створення": "May 28, 2026 2:20 PM", "Дизайнер": "Дизайнер 05", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 16", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "В процесі", "Тип креатива:": "Адаптація"}, {"Таска": "Адаптація демо", "Files & media": "", "GEO": "GEO 37", "Id": "DEMO-220", "Post": "ID: DEMO-220\nBuyer: Баєр 06\nTask: Адаптація демо", "Text": "Демо-опис задачі DEMO-220. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 06", "Дата взяття в роботу": "01/06/2026", "Дата видачі": "01/06/2026", "Дата створення": "May 28, 2026 3:02 PM", "Дизайнер": "Дизайнер 04", "К-сть": "2", "Креатив": "Відео", "Мова": "Мова 06", "Пріорітет": "Medium", "Розмір": "Reels(9:16)", "Статус таски": "В процесі", "Тип креатива:": "Адаптація"}, {"Таска": "Демо задача 221", "Files & media": "", "GEO": "", "Id": "DEMO-221", "Post": "ID: DEMO-221\nBuyer: Баєр Demo\nTask: Демо задача 221", "Text": "Демо-опис задачі DEMO-221. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "", "Дата взяття в роботу": "", "Дата видачі": "", "Дата створення": "May 28, 2026 4:33 PM", "Дизайнер": "", "К-сть": "", "Креатив": "Відео", "Мова": "", "Пріорітет": "", "Розмір": "", "Статус таски": "Hold", "Тип креатива:": ""}, {"Таска": "PWA демо", "Files & media": "", "GEO": "GEO 02", "Id": "DEMO-222", "Post": "ID: DEMO-222\nBuyer: Баєр 13\nTask: PWA демо", "Text": "Демо-опис задачі DEMO-222. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 13", "Дата взяття в роботу": "01/06/2026", "Дата видачі": "01/06/2026", "Дата створення": "May 29, 2026 11:10 PM", "Дизайнер": "Дизайнер 02", "К-сть": "1", "Креатив": "PWA", "Мова": "Мова 46", "Пріорітет": "High", "Розмір": "", "Статус таски": "В процесі", "Тип креатива:": "з нуля"}, {"Таска": "Статика демо", "Files & media": "", "GEO": "GEO 19", "Id": "DEMO-223", "Post": "ID: DEMO-223\nBuyer: Баєр 10\nTask: Статика демо", "Text": "Демо-опис задачі DEMO-223. Дані анонімізовано для публічного показу.", "link": "", "Баєр": "Баєр 10", "Дата взяття в роботу": "01/06/2026", "Дата видачі": "01/06/2026", "Дата створення": "May 30, 2026 7:51 PM", "Дизайнер": "Дизайнер 02", "К-сть": "2", "Креатив": "Статика", "Мова": "Мова 18", "Пріорітет": "Medium", "Розмір": "Квадрат(1:1)", "Статус таски": "В процесі", "Тип креатива:": "з нуля"}]}</script>
+    <script>
+const fields = {
+  date: ["Дата створення", "Дата взяття в роботу", "Дата видачі"],
+  designer: "Дизайнер",
+  buyer: "Баєр",
+  status: "Статус таски",
+  type: "Тип креатива:",
+  priority: "Пріорітет",
+  quantity: "К-сть",
+  geo: "GEO",
+  task: "Таска",
+  creative: "Креатив",
+  size: "Розмір",
+  language: "Мова",
+  text: "Text",
+  post: "Post",
+  id: "Id",
+};
+
+const colors = ["#5b6af0", "#a78bfa", "#34d399", "#fb923c", "#f43f5e", "#fbbf24", "#818cf8", "#94a3b8"];
+let allRows = [];
+let filteredRows = [];
+let rangeMode = "all";
+let selectedDesigner = "";
+
+const els = {
+  fileInput: document.querySelector("#fileInput"),
+  notice: document.querySelector("#notice"),
+  reportTitle: document.querySelector("#reportTitle"),
+  dateBadge: document.querySelector("#dateBadge"),
+  rangeMode: document.querySelector("#rangeMode"),
+  dateField: document.querySelector("#dateField"),
+  monthWrap: document.querySelector("#monthWrap"),
+  monthInput: document.querySelector("#monthInput"),
+  startWrap: document.querySelector("#startWrap"),
+  startDate: document.querySelector("#startDate"),
+  endWrap: document.querySelector("#endWrap"),
+  endDate: document.querySelector("#endDate"),
+  designerFilter: document.querySelector("#designerFilter"),
+  buyerFilter: document.querySelector("#buyerFilter"),
+  statusFilter: document.querySelector("#statusFilter"),
+  typeFilter: document.querySelector("#typeFilter"),
+  searchInput: document.querySelector("#searchInput"),
+  snapshotExport: document.querySelector("#snapshotExport"),
+  exportFiltered: document.querySelector("#exportFiltered"),
+};
+
+window.addEventListener("DOMContentLoaded", async () => {
+  fields.date.forEach((field) => addOption(els.dateField, field, field));
+  els.dateField.value = "Дата створення";
+  bindEvents();
+
+  try {
+    const embedded = readEmbeddedSnapshot();
+    if (embedded) {
+      loadSnapshot(embedded, "Демо-аналітика");
+      return;
+    }
+
+    const snapshot = await fetch("assets/latest-data.json", { cache: "no-store" });
+    if (!snapshot.ok) throw new Error("No saved snapshot");
+    loadSnapshot(await snapshot.json(), "Остання збережена аналітика");
+  } catch {
+    try {
+      const response = await fetch("assets/sample-notion-export.csv");
+      if (!response.ok) throw new Error("No demo CSV");
+      const csv = await response.text();
+      loadCsv(csv, "Демо-дані з поточного Notion export");
+    } catch {
+      setNotice("Завантажте CSV-файл експорту Notion або додайте assets/latest-data.json, щоб усі бачили останню аналітику.");
+    }
+  }
+});
+
+function readEmbeddedSnapshot() {
+  const node = document.querySelector("#embeddedSnapshot");
+  if (!node || !node.textContent.trim()) return null;
+  try {
+    return JSON.parse(node.textContent);
+  } catch {
+    return null;
+  }
+}
+
+function bindEvents() {
+  document.querySelectorAll(".tab").forEach((button) => {
+    button.addEventListener("click", () => switchTab(button.dataset.tab));
+  });
+
+  document.addEventListener("click", (event) => {
+    const drill = event.target.closest("[data-designer-drill]");
+    if (!drill) return;
+    selectedDesigner = decodeURIComponent(drill.dataset.designerDrill);
+    renderTeam();
+  });
+
+  els.fileInput.addEventListener("change", async (event) => {
+    const files = [...event.target.files].filter((file) => /\.csv$/i.test(file.name) || file.type.includes("csv"));
+    if (!files.length) return;
+    await loadCsvFiles(files);
+    event.target.value = "";
+  });
+
+  els.rangeMode.addEventListener("click", (event) => {
+    if (!event.target.matches("button")) return;
+    rangeMode = event.target.dataset.mode;
+    [...els.rangeMode.querySelectorAll("button")].forEach((button) => {
+      button.classList.toggle("active", button === event.target);
+    });
+    els.monthWrap.hidden = rangeMode !== "month";
+    els.startWrap.hidden = rangeMode !== "custom";
+    els.endWrap.hidden = rangeMode !== "custom";
+    update();
+  });
+
+  [
+    els.dateField,
+    els.monthInput,
+    els.startDate,
+    els.endDate,
+    els.designerFilter,
+    els.buyerFilter,
+    els.statusFilter,
+    els.typeFilter,
+    els.searchInput,
+  ].forEach((input) => input.addEventListener("input", update));
+
+  els.snapshotExport.addEventListener("click", exportSnapshotJson);
+  els.exportFiltered.addEventListener("click", exportFilteredCsv);
+}
+
+function switchTab(name) {
+  document.querySelectorAll(".section").forEach((section) => section.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.tab === name));
+  document.querySelector(`#tab-${name}`).classList.add("active");
+}
+
+function loadCsv(csv, sourceName) {
+  loadRows(parseCsv(csv), sourceName);
+}
+
+function loadRows(rows, sourceName) {
+  allRows = rows.map(normalizeRow).filter((row) => row[fields.id] || row[fields.task]);
+  populateFilters();
+  setDefaultDates();
+  setNotice(`${sourceName}: завантажено ${allRows.length} задач.`);
+  update();
+}
+
+function loadSnapshot(snapshot, sourceName) {
+  if (!snapshot || !Array.isArray(snapshot.rows)) {
+    throw new Error("Invalid snapshot");
+  }
+  loadRows(snapshot.rows, `${sourceName} (${snapshot.generatedAt ? new Date(snapshot.generatedAt).toLocaleString("uk-UA") : "без дати"})`);
+}
+
+async function loadCsvFiles(files) {
+  const parsedFiles = [];
+  const skipped = [];
+  let baseHeader = null;
+
+  for (const file of files) {
+    const csv = await file.text();
+    const parsed = parseCsvWithHeader(csv);
+
+    if (!parsed.header.length) {
+      skipped.push(`${file.name}: порожній файл`);
+      continue;
+    }
+
+    if (!baseHeader) {
+      baseHeader = parsed.header;
+    }
+
+    if (!sameHeader(baseHeader, parsed.header)) {
+      skipped.push(`${file.name}: інша структура колонок`);
+      continue;
+    }
+
+    parsedFiles.push({ file, rows: parsed.rows });
+  }
+
+  const mergedRows = parsedFiles.flatMap((item) => item.rows);
+  allRows = mergedRows.map(normalizeRow).filter((row) => row[fields.id] || row[fields.task]);
+  populateFilters();
+  setDefaultDates();
+
+  const sourceLabel =
+    files.length === 1
+      ? `${files[0].name}`
+      : `${parsedFiles.length} CSV об'єднано (${formatNumber(allRows.length)} задач)`;
+  const warning = skipped.length ? ` Пропущено: ${skipped.join("; ")}.` : "";
+  setNotice(`${sourceLabel}: завантажено ${allRows.length} задач.${warning}`);
+  update();
+}
+
+function update() {
+  filteredRows = allRows.filter(matchesFilters);
+  updateHeader();
+  renderOverview();
+  renderTeam();
+  renderGeo();
+  renderInsights();
+  renderTable();
+}
+
+function parseCsv(text) {
+  return parseCsvWithHeader(text).rows;
+}
+
+function parseCsvWithHeader(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+  const cleanText = text.replace(/^\uFEFF/, "");
+
+  for (let index = 0; index < cleanText.length; index += 1) {
+    const char = cleanText[index];
+    const next = cleanText[index + 1];
+
+    if (char === '"' && inQuotes && next === '"') {
+      cell += '"';
+      index += 1;
+      continue;
+    }
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      continue;
+    }
+    if (char === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") index += 1;
+      row.push(cell);
+      if (row.some((value) => value.trim())) rows.push(row);
+      row = [];
+      cell = "";
+      continue;
+    }
+    cell += char;
+  }
+
+  row.push(cell);
+  if (row.some((value) => value.trim())) rows.push(row);
+
+  const header = rows.shift() || [];
+  return {
+    header,
+    rows: rows.map((values) => Object.fromEntries(header.map((key, index) => [key, values[index] || ""]))),
+  };
+}
+
+function sameHeader(a, b) {
+  return a.length === b.length && a.every((value, index) => clean(value) === clean(b[index]));
+}
+
+function normalizeRow(row) {
+  const next = { ...row };
+  next.__quantity = Number.parseFloat(String(row[fields.quantity] || "0").replace(",", ".")) || 0;
+  next.__search = [
+    row[fields.id],
+    row[fields.task],
+    row[fields.text],
+    row[fields.post],
+    row[fields.geo],
+    row[fields.type],
+    row[fields.creative],
+    row[fields.language],
+  ]
+    .join(" ")
+    .toLowerCase();
+  return next;
+}
+
+function populateFilters() {
+  fillSelect(els.designerFilter, uniqueValues(fields.designer));
+  fillSelect(els.buyerFilter, uniqueValues(fields.buyer));
+  fillSelect(els.statusFilter, uniqueValues(fields.status));
+  fillSelect(els.typeFilter, uniqueValues(fields.type));
+}
+
+function fillSelect(select, values) {
+  select.innerHTML = "";
+  addOption(select, "Усі", "");
+  values.forEach((value) => addOption(select, value, value));
+}
+
+function addOption(select, label, value) {
+  const option = document.createElement("option");
+  option.textContent = label;
+  option.value = value;
+  select.append(option);
+}
+
+function uniqueValues(field) {
+  return [...new Set(allRows.map((row) => clean(row[field])).filter(Boolean))].sort((a, b) => a.localeCompare(b, "uk"));
+}
+
+function setDefaultDates() {
+  const dates = allRows.map((row) => parseNotionDate(row[els.dateField.value])).filter(Boolean).sort((a, b) => a - b);
+  if (!dates.length) return;
+  els.monthInput.value = toMonthInput(dates.at(-1));
+  els.startDate.value = toDateInput(dates[0]);
+  els.endDate.value = toDateInput(dates.at(-1));
+}
+
+function matchesFilters(row) {
+  const selectedDate = parseNotionDate(row[els.dateField.value]);
+  if (rangeMode === "month") {
+    if (!selectedDate || toMonthInput(selectedDate) !== els.monthInput.value) return false;
+  }
+  if (rangeMode === "custom") {
+    if (!selectedDate) return false;
+    if (els.startDate.value && selectedDate < parseInputDate(els.startDate.value)) return false;
+    if (els.endDate.value && selectedDate > endOfDay(parseInputDate(els.endDate.value))) return false;
+  }
+  if (els.designerFilter.value && clean(row[fields.designer]) !== els.designerFilter.value) return false;
+  if (els.buyerFilter.value && clean(row[fields.buyer]) !== els.buyerFilter.value) return false;
+  if (els.statusFilter.value && clean(row[fields.status]) !== els.statusFilter.value) return false;
+  if (els.typeFilter.value && clean(row[fields.type]) !== els.typeFilter.value) return false;
+
+  const needle = els.searchInput.value.trim().toLowerCase();
+  return !needle || row.__search.includes(needle);
+}
+
+function updateHeader() {
+  const dates = filteredRows.map((row) => parseNotionDate(row[els.dateField.value])).filter(Boolean).sort((a, b) => a - b);
+  if (!dates.length) {
+    els.dateBadge.textContent = "-";
+    els.reportTitle.textContent = "MounthAnalytic";
+    return;
+  }
+  const start = dates[0];
+  const end = dates.at(-1);
+  els.dateBadge.textContent = `${formatShortDate(start)} - ${formatShortDate(end)}`;
+  els.reportTitle.textContent = monthTitle(start, end);
+}
+
+function renderOverview() {
+  const tasks = filteredRows.length;
+  const creatives = sumQuantity(filteredRows);
+  const done = filteredRows.filter((row) => isDone(row[fields.status])).length;
+  const cycleValues = filteredRows
+    .map((row) => daysBetween(parseNotionDate(row["Дата взяття в роботу"]), parseNotionDate(row["Дата видачі"])))
+    .filter((value) => Number.isFinite(value) && value >= 0);
+  const avgCycle = average(cycleValues);
+  const topBuyer = countBy(filteredRows, fields.buyer, true)[0];
+  const ids = filteredRows.map((row) => clean(row[fields.id])).filter(Boolean);
+
+  document.querySelector("#overviewKpis").innerHTML = [
+    kpi("blue", "Всього тасок", tasks, ids.length ? `${ids[0]} -> ${ids.at(-1)}` : "У вибірці"),
+    kpi("green", "Виконано", done, tasks ? `${((done / tasks) * 100).toFixed(1)}% від усіх` : "0% від усіх"),
+    kpi("blue", "Всього креативів", formatNumber(creatives), `~${tasks ? (creatives / tasks).toFixed(1) : 0} на таску`),
+    kpi("orange", "Середня видача", Number.isFinite(avgCycle) ? avgCycle.toFixed(1) : "-", `дні · ${cycleValues.length} тасок з датою`),
+    kpi("purple", "Топ баєр", topBuyer?.name || "-", topBuyer ? `${formatNumber(topBuyer.value)} креативів` : "Немає даних", true),
+  ].join("");
+
+  const daily = countByDate(filteredRows, els.dateField.value);
+  const peakDays = [...daily].sort((a, b) => b.value - a.value).slice(0, 9);
+  renderBars("#peakDaysChart", peakDays, { mono: true, label: (item) => shortDayLabel(item.name), value: (item) => item.value });
+  const peak = peakDays[0];
+  document.querySelector("#peakDaysNote").innerHTML = peak
+    ? `Пік: <span style="color:#f43f5e;font-weight:600">${shortDayLabel(peak.name)} - ${peak.value} тасок</span> за один день`
+    : "Немає дат у вибірці";
+
+  renderBars("#creativeChart", countBy(filteredRows, fields.creative, false).slice(0, 6));
+  renderBars("#typeChart", countBy(filteredRows, fields.type, false).slice(0, 5));
+  renderTimeline(daily);
+  renderBars("#priorityChart", countBy(filteredRows, fields.priority, false).slice(0, 6), { tone: priorityColor });
+  renderBars("#statusChart", countBy(filteredRows, fields.status, false).slice(0, 6), { tone: statusColor });
+}
+
+function renderTeam() {
+  const designers = enrichPeople(countBy(filteredRows, fields.designer, true), countBy(filteredRows, fields.designer, false));
+  if (!designers.some((item) => item.name === selectedDesigner)) selectedDesigner = designers[0]?.name || "";
+  document.querySelector("#designerCards").innerHTML = designers.slice(0, 8).map(designerCard).join("");
+  renderBars("#designerCreativeChart", designers.slice(0, 10), {
+    mono: true,
+    value: (item) => item.value,
+    drillDesigner: true,
+  });
+  renderBars("#designerTaskChart", [...designers].sort((a, b) => b.tasks - a.tasks).slice(0, 10), {
+    mono: true,
+    value: (item) => item.tasks,
+    maxValue: (items) => Math.max(1, ...items.map((item) => item.tasks)),
+    drillDesigner: true,
+  });
+  renderDesignerDetail(selectedDesigner);
+  const buyers = enrichPeople(countBy(filteredRows, fields.buyer, true), countBy(filteredRows, fields.buyer, false));
+  renderBars("#buyerChart", buyers.slice(0, 14), {
+    mono: true,
+    value: (item) => `${formatNumber(item.value)} крео · ${item.tasks} тасок`,
+  });
+}
+
+function renderGeo() {
+  const geoTasks = countBy(filteredRows, fields.geo, false);
+  const geoCreatives = countBy(filteredRows, fields.geo, true);
+  const languages = countBy(filteredRows, fields.language, false);
+  const arabicRows = filteredRows.filter((row) => /араб|arab|sy|iq|ye|jo|lb|mr/i.test([row[fields.language], row[fields.geo]].join(" "))).length;
+
+  document.querySelector("#geoKpis").innerHTML = [
+    kpi("blue", "Унікальних GEO", geoTasks.filter((item) => item.name !== "Без значення").length, "Записів у таблиці"),
+    kpi("purple", "Топ GEO (таски)", compactGeo(geoTasks[0]?.name || "-"), geoTasks[0] ? `${geoTasks[0].value} тасок` : "Немає даних", true),
+    kpi("green", "Топ GEO (к-сть)", compactGeo(geoCreatives[0]?.name || "-"), geoCreatives[0] ? `${formatNumber(geoCreatives[0].value)} креативів` : "Немає даних", true),
+    kpi("orange", "Арабо-орієнтовано", filteredRows.length ? `~${Math.round((arabicRows / filteredRows.length) * 100)}%` : "0%", "SY, IQ, YE, JO, LB, MR"),
+  ].join("");
+
+  renderBars("#geoTaskChart", geoTasks.slice(0, 10), { label: (item) => geoLabel(item.name) });
+  renderBars("#geoCreativeChart", geoCreatives.slice(0, 10), { label: (item) => geoLabel(item.name) });
+  document.querySelector("#languageTags").innerHTML = languages
+    .slice(0, 14)
+    .map((item, index) => `<span class="tag" style="border-color:${hexToRgba(colors[index % colors.length], 0.24)};background:${hexToRgba(colors[index % colors.length], 0.12)};color:${colors[index % colors.length]}">🔤 ${escapeHtml(item.name)} · ${item.value}</span>`)
+    .join("");
+}
+
+function renderInsights() {
+  const tasks = filteredRows.length;
+  const creatives = sumQuantity(filteredRows);
+  const done = filteredRows.filter((row) => isDone(row[fields.status])).length;
+  const topBuyer = countBy(filteredRows, fields.buyer, true)[0];
+  const topDesigner = countBy(filteredRows, fields.designer, true)[0];
+  const topGeo = countBy(filteredRows, fields.geo, false)[0];
+  const topDay = countByDate(filteredRows, els.dateField.value).sort((a, b) => b.value - a.value)[0];
+  const topCreative = countBy(filteredRows, fields.creative, false)[0];
+  const critical = filteredRows.filter((row) => clean(row[fields.priority]).toLowerCase().includes("critical"));
+  const adaptations = filteredRows.filter((row) => /адап|adapt/i.test(clean(row[fields.type])));
+
+  const insights = [
+    ["📊", "Завершеність", tasks ? `${((done / tasks) * 100).toFixed(1)}% тасок виконано. У вибірці <strong>${tasks}</strong> задач і <strong>${formatNumber(creatives)}</strong> креативів.` : "Немає задач у вибірці."],
+    ["👑", `Топ-баєр: ${topBuyer?.name || "-"}`, topBuyer ? `Замовив <strong>${formatNumber(topBuyer.value)} креативів</strong>. Це найбільший обсяг у поточному фільтрі.` : "Немає баєрів у вибірці."],
+    ["🎨", `Топ-дизайнер: ${topDesigner?.name || "-"}`, topDesigner ? `<strong>${formatNumber(topDesigner.value)} креативів</strong> у поточній вибірці. Добре видно, хто тримає основний production-volume.` : "Немає дизайнерів у вибірці."],
+    ["🌍", `Топ GEO: ${compactGeo(topGeo?.name || "-")}`, topGeo ? `<strong>${topGeo.value} тасок</strong> припадає на цей GEO/кластер.` : "GEO не заповнені."],
+    ["📈", "Піки активності", topDay ? `Найбільше задач по даті <strong>${shortDayLabel(topDay.name)}: ${topDay.value}</strong>. Це день з найбільшим навантаженням.` : "Немає дат у вибірці."],
+    ["🎬", `Домінує формат: ${topCreative?.name || "-"}`, topCreative ? `<strong>${topCreative.value}</strong> задач у цьому форматі. Варто дивитись, чи не перекошує це production.` : "Формати не заповнені."],
+    ["⚡", "Critical / швидка реакція", critical.length ? `<strong>${critical.length}</strong> critical-задач дали <strong>${formatNumber(sumQuantity(critical))}</strong> креативів.` : "Critical-задач у вибірці немає."],
+    ["🔄", "Адаптації", tasks ? `<strong>${adaptations.length}</strong> задач, або ${Math.round((adaptations.length / tasks) * 100)}%, схожі на адаптації існуючих креативів.` : "Немає даних."],
+  ];
+
+  document.querySelector("#insightCards").innerHTML = insights.map(insightCard).join("");
+  renderContentCards();
+  renderPatterns();
+}
+
+function renderContentCards() {
+  const patterns = [
+    ["📰", "Новина / Новостник", ["новин", "новост", "news"], "#f43f5e"],
+    ["🎮", "Ігровий контент", ["chicken", "кур", "slot", "слот", "plinko", "плінко", "zeus", "зевс"], "#5b6af0"],
+    ["🎲", "Plinko", ["plinko", "плінко"], "#34d399"],
+    ["🎰", "Слоти / Мультислот", ["slot", "слот", "multi"], "#fbbf24"],
+    ["🏦", "Банкінг / локалізація", ["банк", "bank", "cash", "валют", "currency"], "#fb923c"],
+    ["📱", "PWA", ["pwa"], "#a78bfa"],
+    ["🎭", "Дипфейк", ["дипф", "deepfake"], "#f43f5e"],
+    ["🎬", "UGC / Motion", ["ugc", "motion", "стример"], "#818cf8"],
+  ];
+
+  document.querySelector("#contentCards").innerHTML = patterns
+    .map(([icon, title, keys, color]) => {
+      const matches = filteredRows.filter((row) => keys.some((key) => row.__search.includes(key))).length;
+      return `
+        <div class="content-card" style="border-color:${hexToRgba(color, 0.15)};background:${hexToRgba(color, 0.06)}">
+          <div class="content-icon">${icon}</div>
+          <div class="content-title">${title}</div>
+          <div class="content-text">${matches} задач у вибірці. Рахується за назвами, описами і текстом задач.</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderPatterns() {
+  const keywords = keywordCounts().slice(0, 8);
+  const patterns = keywords.length
+    ? keywords.map(([word, count], index) => [
+        colors[index % colors.length],
+        word,
+        `Зустрічається ${count} разів у текстах задач. Може бути окремою категорією для майбутньої аналітики.`,
+      ])
+    : [["#a78bfa", "Недостатньо текстів", "Завантажте CSV з описами задач, щоб побачити паттерни."]];
+
+  document.querySelector("#patternList").innerHTML = patterns
+    .map(
+      ([color, title, text]) => `
+        <div class="pattern-row">
+          <span class="pattern-arrow" style="color:${color}">→</span>
+          <div>
+            <div class="pattern-title">${escapeHtml(title)}</div>
+            <div class="pattern-text">${escapeHtml(text)}</div>
+          </div>
+        </div>
+      `,
+    )
+    .join("");
+}
+
+function renderTable() {
+  document.querySelector("#taskRows").innerHTML = filteredRows
+    .slice(0, 250)
+    .map((row) => {
+      const date = parseNotionDate(row[els.dateField.value]);
+      return `
+        <tr>
+          <td class="task-id">${escapeHtml(row[fields.id])}</td>
+          <td class="task-name">${escapeHtml(row[fields.task])}</td>
+          <td>${date ? date.toLocaleDateString("uk-UA") : ""}</td>
+          <td>${escapeHtml(row[fields.designer])}</td>
+          <td>${escapeHtml(row[fields.buyer])}</td>
+          <td>${formatNumber(row.__quantity)}</td>
+          <td><span class="badge ${badgeClass(row[fields.status])}">${escapeHtml(row[fields.status])}</span></td>
+          <td class="geo-text" title="${escapeHtml(row[fields.geo])}">${escapeHtml(row[fields.geo])}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+function renderBars(selector, items, options = {}) {
+  const element = document.querySelector(selector);
+  const top = items.filter((item) => item.value || item.tasks).slice(0, 12);
+  const valueForMax = options.maxValue || ((list) => Math.max(1, ...list.map((item) => Number(item.value) || Number(item.tasks) || 0)));
+  const max = valueForMax(top);
+  element.innerHTML = top
+    .map((item, index) => {
+      const numericValue = Number(item.value) || Number(item.tasks) || 0;
+      const width = numericValue ? Math.max(3, (numericValue / max) * 100) : 0;
+      const color = options.tone ? options.tone(item.name, index, numericValue) : colors[index % colors.length];
+      const label = options.label ? options.label(item) : item.name;
+      const value = options.value ? options.value(item) : formatNumber(item.value);
+      const drillAttrs = options.drillDesigner ? `data-designer-drill="${encodeURIComponent(item.name)}"` : "";
+      const activeClass = options.drillDesigner && item.name === selectedDesigner ? " active" : "";
+      return `
+        <div class="bar-row ${options.drillDesigner ? "clickable" : ""}${activeClass}" ${drillAttrs}>
+          <div class="bar-label ${options.mono ? "mono" : ""}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${width.toFixed(1)}%;background:${color}"></div></div>
+          <div class="bar-val" style="${index === 0 ? `color:${color};font-weight:700` : ""}">${escapeHtml(value)}</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderTimeline(daily) {
+  const element = document.querySelector("#timelineChart");
+  const max = Math.max(1, ...daily.map((item) => item.value));
+  const chartHeight = 96;
+  element.innerHTML = daily
+    .map((item) => {
+      const height = Math.max(4, (item.value / max) * chartHeight);
+      const color = item.value / max > 0.72 ? "#f43f5e" : item.value / max > 0.45 ? "#fb923c" : "#5b6af0";
+      return `
+        <div class="timeline-bar-wrap" title="${shortDayLabel(item.name)}: ${item.value} тасок">
+          <div class="timeline-val">${item.value}</div>
+          <div class="timeline-bar" style="height:${height}px;background:${color}"></div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const axis = document.createElement("div");
+  axis.className = "timeline-axis";
+  axis.innerHTML = daily.map((item) => `<span class="timeline-axis-label">${shortDayLabel(item.name).split(".")[0]}</span>`).join("");
+  element.append(axis);
+}
+
+function kpi(color, label, value, sub, compact = false) {
+  return `
+    <div class="kpi-card ${color}">
+      <div class="kpi-label">${escapeHtml(label)}</div>
+      <div class="kpi-value ${color}" style="${compact ? "font-size:22px;letter-spacing:-1px" : ""}">${escapeHtml(value)}</div>
+      <div class="kpi-sub">${escapeHtml(sub)}</div>
+    </div>
+  `;
+}
+
+function designerCard(item, index) {
+  const rank = index + 1;
+  const name = compactPerson(item.name);
+  return `
+    <div class="designer-card ${item.name === selectedDesigner ? "active" : ""}" data-designer-drill="${encodeURIComponent(item.name)}">
+      <div class="rank-badge rank-${Math.min(rank, 5)}">#${rank}</div>
+      <div class="designer-name">${escapeHtml(name)}</div>
+      <div class="designer-handle">${escapeHtml(item.name)}</div>
+      <div class="designer-stats">
+        <div><div class="d-stat-val" style="color:${colors[index % colors.length]}">${formatNumber(item.value)}</div><div class="d-stat-label">Креативів</div></div>
+        <div><div class="d-stat-val" style="color:#5b6af0">${item.tasks}</div><div class="d-stat-label">Тасок</div></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDesignerDetail(designer) {
+  const card = document.querySelector("#designerDetailCard");
+  if (!designer) {
+    card.innerHTML = `<div class="chart-title">Деталізація дизайнера</div><div class="chart-note">Немає дизайнера у вибірці.</div>`;
+    return;
+  }
+
+  const rows = filteredRows.filter((row) => clean(row[fields.designer]) === designer);
+  const tasks = rows.length;
+  const creatives = sumQuantity(rows);
+  const creativeBreakdown = countBy(rows, fields.creative, true).slice(0, 8);
+  const topicBreakdown = countBy(rows, fields.task, true).slice(0, 10);
+  const taskList = rows
+    .slice()
+    .sort((a, b) => (parseNotionDate(b[els.dateField.value]) || 0) - (parseNotionDate(a[els.dateField.value]) || 0))
+    .slice(0, 80);
+
+  card.innerHTML = `
+    <div class="detail-head">
+      <div>
+        <div class="chart-title">Деталізація дизайнера</div>
+        <div class="detail-name">${escapeHtml(compactPerson(designer))}</div>
+        <div class="detail-handle">${escapeHtml(designer)}</div>
+      </div>
+      <div class="detail-metrics">
+        <div class="mini-metric"><div class="mini-value" style="color:#5b6af0">${tasks}</div><div class="mini-label">Тасок</div></div>
+        <div class="mini-metric"><div class="mini-value" style="color:#34d399">${formatNumber(creatives)}</div><div class="mini-label">Креативів</div></div>
+        <div class="mini-metric"><div class="mini-value" style="color:#a78bfa">${tasks ? (creatives / tasks).toFixed(1) : "0"}</div><div class="mini-label">Крео / таску</div></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <div class="detail-subtitle">Формати: Відео / Статика / PWA</div>
+        <div class="bar-chart" id="designerCreativeBreakdown"></div>
+      </div>
+      <div>
+        <div class="detail-subtitle">Теми / назви задач: таски і креативи</div>
+        <div class="bar-chart" id="designerTopicBreakdown"></div>
+      </div>
+    </div>
+    <div class="detail-subtitle">Конкретні задачі</div>
+    <div class="task-list">
+      ${taskList.map(taskPill).join("")}
+    </div>
+  `;
+
+  renderBars("#designerCreativeBreakdown", creativeBreakdown, {
+    value: (item) => {
+      const formatRows = rows.filter((row) => (clean(row[fields.creative]) || "Без значення") === item.name);
+      return `${formatRows.length} т. · ${formatNumber(item.value)} крео`;
+    },
+  });
+  renderBars("#designerTopicBreakdown", topicBreakdown, {
+    value: (item) => {
+      const topicRows = rows.filter((row) => (clean(row[fields.task]) || "Без значення") === item.name);
+      return `${topicRows.length} т. · ${formatNumber(item.value)} крео`;
+    },
+  });
+}
+
+function taskPill(row) {
+  const date = parseNotionDate(row[els.dateField.value]);
+  const meta = [row[fields.creative], row[fields.type], row[fields.geo], date ? date.toLocaleDateString("uk-UA") : ""]
+    .map(clean)
+    .filter(Boolean)
+    .join(" · ");
+  return `
+    <div class="task-pill">
+      <div class="task-pill-id">${escapeHtml(row[fields.id])}</div>
+      <div class="task-pill-main">
+        <div class="task-pill-title" title="${escapeHtml(row[fields.task])}">${escapeHtml(row[fields.task] || "Без назви")}</div>
+        <div class="task-pill-meta">${escapeHtml(meta)}</div>
+      </div>
+      <div class="task-pill-qty">${formatNumber(row.__quantity)} крео</div>
+    </div>
+  `;
+}
+
+function insightCard([icon, title, text]) {
+  return `
+    <div class="insight-card">
+      <div class="insight-icon">${icon}</div>
+      <div>
+        <div class="insight-title">${escapeHtml(title)}</div>
+        <div class="insight-text">${text}</div>
+      </div>
+    </div>
+  `;
+}
+
+function enrichPeople(quantityItems, taskItems) {
+  const taskMap = new Map(taskItems.map((item) => [item.name, item.value]));
+  return quantityItems.map((item) => ({ ...item, tasks: taskMap.get(item.name) || 0 }));
+}
+
+function countBy(rows, field, useQuantity) {
+  const counts = new Map();
+  rows.forEach((row) => {
+    const key = clean(row[field]) || "Без значення";
+    counts.set(key, (counts.get(key) || 0) + (useQuantity ? row.__quantity || 1 : 1));
+  });
+  return [...counts.entries()].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+}
+
+function countByDate(rows, field) {
+  const counts = new Map();
+  rows.forEach((row) => {
+    const date = parseNotionDate(row[field]);
+    if (!date) return;
+    const key = toDateInput(date);
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  return [...counts.entries()].map(([name, value]) => ({ name, value })).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function keywordCounts() {
+  const stop = new Set(["the", "and", "for", "with", "this", "that", "task", "buyer", "id", "https", "http", "com", "www", "notion", "source", "copy_link"]);
+  const counts = new Map();
+  filteredRows.forEach((row) => {
+    const words = [row[fields.text], row[fields.post], row[fields.task]].join(" ").toLowerCase().match(/[a-zа-яіїєґ0-9@_-]{3,}/giu) || [];
+    words.forEach((word) => {
+      if (stop.has(word) || /^ts-\d+$/i.test(word)) return;
+      counts.set(word, (counts.get(word) || 0) + 1);
+    });
+  });
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function exportFilteredCsv() {
+  if (!filteredRows.length) return;
+  const header = Object.keys(filteredRows[0]).filter((key) => !key.startsWith("__"));
+  const csv = [header, ...filteredRows.map((row) => header.map((key) => row[key] || ""))]
+    .map((values) => values.map(csvEscape).join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "mounthanalytic-filtered.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportSnapshotJson() {
+  if (!allRows.length) return;
+  const rows = allRows.map(stripInternalFields);
+  const snapshot = {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    rowCount: rows.length,
+    note: "Generated by MounthAnalytic. Commit this file as public/mounthanalytic/assets/latest-data.json to show latest analytics to everyone.",
+    rows,
+  };
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "latest-data.json";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function stripInternalFields(row) {
+  return Object.fromEntries(Object.entries(row).filter(([key]) => !key.startsWith("__")));
+}
+
+function statusColor(name) {
+  const text = clean(name).toLowerCase();
+  if (text.includes("викон")) return "#34d399";
+  if (text.includes("перев")) return "#fb923c";
+  if (text.includes("проц")) return "#5b6af0";
+  if (text.includes("нова")) return "#a78bfa";
+  if (text.includes("hold")) return "#f43f5e";
+  return "#6b6b80";
+}
+
+function priorityColor(name) {
+  const text = clean(name).toLowerCase();
+  if (text.includes("critical")) return "#f43f5e";
+  if (text.includes("high")) return "#fb923c";
+  if (text.includes("medium")) return "#5b6af0";
+  return "#6b6b80";
+}
+
+function badgeClass(status) {
+  const text = clean(status).toLowerCase();
+  if (text.includes("викон")) return "badge-done";
+  if (text.includes("перев")) return "badge-review";
+  if (text.includes("проц")) return "badge-progress";
+  if (text.includes("нова")) return "badge-new";
+  return "badge-critical";
+}
+
+function parseNotionDate(value) {
+  if (!value) return null;
+  const date = new Date(String(value).replace(/(\d{1,2}):(\d{2})\s?(AM|PM)/i, "$1:$2 $3"));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseInputDate(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function endOfDay(date) {
+  const next = new Date(date);
+  next.setHours(23, 59, 59, 999);
+  return next;
+}
+
+function daysBetween(start, end) {
+  if (!start || !end) return Number.NaN;
+  return (end - start) / 86_400_000;
+}
+
+function average(values) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : Number.NaN;
+}
+
+function sumQuantity(rows) {
+  return rows.reduce((sum, row) => sum + row.__quantity, 0);
+}
+
+function isDone(status) {
+  return clean(status).toLowerCase().includes("викон");
+}
+
+function clean(value) {
+  return String(value || "").trim();
+}
+
+function toDateInput(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function toMonthInput(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function formatShortDate(date) {
+  return `${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}.${date.getFullYear()}`;
+}
+
+function shortDayLabel(value) {
+  const date = parseInputDate(value);
+  return `${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthTitle(start, end) {
+  const months = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
+  return start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()
+    ? months[start.getMonth()]
+    : `${months[start.getMonth()]} - ${months[end.getMonth()]}`;
+}
+
+function compactPerson(value) {
+  const match = clean(value).match(/\(([^)]+)\)/);
+  return match ? match[1] : clean(value).replace(/^@/, "");
+}
+
+function compactGeo(value) {
+  return clean(value).split(",")[0].replace(/\s*\(.+?\)/, "");
+}
+
+function geoLabel(value) {
+  return compactGeo(value);
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(value || 0);
+}
+
+function hexToRgba(hex, alpha) {
+  const cleanHex = hex.replace("#", "");
+  const bigint = Number.parseInt(cleanHex, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function escapeHtml(value) {
+  return clean(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+}
+
+function csvEscape(value) {
+  const string = String(value ?? "");
+  return /[",\n\r]/.test(string) ? `"${string.replace(/"/g, '""')}"` : string;
+}
+
+function setNotice(message) {
+  els.notice.textContent = message;
+}
+
+</script>
+  </body>
+</html>
