@@ -1,214 +1,755 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uk">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MounthAnalytic</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <div class="header-inner">
-          <div class="logo-row">
-            <div class="logo-icon">M</div>
-            <div>
-              <h1 id="reportTitle">MounthAnalytic</h1>
-              <div class="subtitle">Аналітика таблиці · Notion Export</div>
-            </div>
-          </div>
-          <div class="header-actions">
-            <div class="date-badge" id="dateBadge">-</div>
-            <label class="upload-btn">
-              <input id="fileInput" type="file" accept=".csv,text/csv" multiple />
-              Завантажити CSV
-            </label>
-            <button class="upload-btn snapshot-btn" id="snapshotExport" type="button">Зберегти snapshot</button>
-            <button class="upload-btn reset-btn" id="resetCache" type="button" style="display: none;">Скинути кеш</button>
-          </div>
-        </div>
-      </header>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creative Room — детальна аналітика</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#F7F8FA; --card:#FFFFFF; --border:#E4E7EC;
+    --text:#0F1420; --text-dim:#6B7280; --accent:#0066FF; --accent-soft:#EAF1FF;
+    --good:#16A34A; --good-soft:#EAFBEF; --warn:#F59E0B; --bad:#DC2626; --bad-soft:#FDECEC;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 24px 64px;}
 
-      <div class="control-card">
-        <div class="control-head">
-          <div>
-            <div class="control-title">Керування вибіркою</div>
-            <div class="control-sub" id="notice">Завантаження демо-даних...</div>
-          </div>
-          <div class="tabs" role="tablist">
-            <button class="tab active" data-tab="overview">Огляд</button>
-            <button class="tab" data-tab="team">Дизайнера</button>
-            <button class="tab" data-tab="geo">GEO</button>
-            <button class="tab" data-tab="insights">Аналітика</button>
-          </div>
-        </div>
+  header.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:16px;}
+  header.top h1{font-size:21px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em;}
+  header.top p{margin:0;color:var(--text-dim);font-size:13px;}
+  .period-pill{background:var(--accent-soft);color:var(--accent);padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;}
 
-        <div class="filters">
-          <div class="filter-group compact">
-            <span>Період</span>
-            <div class="filter-buttons" id="rangeMode">
-              <button class="filter-btn all active" data-mode="all">Усе</button>
-              <button class="filter-btn" data-mode="month">Місяць</button>
-              <button class="filter-btn" data-mode="custom">Дні</button>
-            </div>
-          </div>
-          <label class="filter-field">
-            Поле дати
-            <select id="dateField"></select>
-          </label>
-          <label class="filter-field" id="monthWrap" hidden>
-            Місяць
-            <input id="monthInput" type="month" />
-          </label>
-          <label class="filter-field" id="startWrap" hidden>
-            Від
-            <input id="startDate" type="date" />
-          </label>
-          <label class="filter-field" id="endWrap" hidden>
-            До
-            <input id="endDate" type="date" />
-          </label>
-          <label class="filter-field">
-            Дизайнер
-            <select id="designerFilter"></select>
-          </label>
-          <label class="filter-field">
-            Баєр
-            <select id="buyerFilter"></select>
-          </label>
-          <label class="filter-field">
-            Статус
-            <select id="statusFilter"></select>
-          </label>
-          <label class="filter-field">
-            Тип
-            <select id="typeFilter"></select>
-          </label>
-          <label class="filter-field search">
-            Пошук
-            <input id="searchInput" type="search" placeholder="casino, slot, offer..." />
-          </label>
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:22px;}
+  .tab-btn{
+    background:none;border:none;padding:10px 16px;font-size:14px;font-weight:600;color:var(--text-dim);
+    cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;
+  }
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+  .kpi .label{font-size:11.5px;color:var(--text-dim);font-weight:600;margin-bottom:7px;text-transform:uppercase;letter-spacing:.03em;}
+  .kpi .value{font-size:25px;font-weight:700;letter-spacing:-0.02em;line-height:1;}
+  .kpi .sub{font-size:12px;color:var(--text-dim);margin-top:6px;}
+  .kpi .sub.good{color:var(--good);} .kpi .sub.warn{color:var(--warn);}
+
+  .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+  .grid-2b{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+  .card h3{margin:0 0 2px;font-size:14px;font-weight:600;}
+  .card .card-sub{font-size:12px;color:var(--text-dim);margin-bottom:12px;}
+  .chart-box{position:relative;}
+
+  table.data-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.data-table th{text-align:left;color:var(--text-dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:0 8px 9px 0;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--card);}
+  table.data-table td{padding:8px 8px 8px 0;border-bottom:1px solid #F0F1F4;}
+  table.data-table tr:last-child td{border-bottom:none;}
+  table.data-table tr:hover td{background:#FAFBFD;}
+  .name-cell{font-weight:600;} .handle{color:var(--text-dim);font-weight:400;font-size:11.5px;}
+  .bar-cell{display:flex;align-items:center;gap:8px;}
+  .bar-track{flex:1;height:6px;background:#EEF0F3;border-radius:3px;overflow:hidden;min-width:50px;}
+  .bar-fill{height:100%;background:var(--accent);border-radius:3px;}
+  .tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;}
+  .tag.medium{background:#EEF0F3;color:#4B5563;} .tag.high{background:#FEF3E2;color:#B45309;} .tag.critical{background:#FDE8E8;color:#B91C1C;}
+  .tag.status-done{background:var(--good-soft);color:var(--good);}
+  .tag.status-progress{background:#FEF3E2;color:#B45309;}
+  .tag.status-new{background:var(--accent-soft);color:var(--accent);}
+  .tag.status-other{background:#EEF0F3;color:#4B5563;}
+
+  .trend-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;font-size:13px;font-weight:700;}
+  .trend-badge.up{background:var(--good-soft);color:var(--good);}
+  .trend-badge.down{background:var(--bad-soft);color:var(--bad);}
+  .trend-badge.flat{background:#EEF0F3;color:var(--text-dim);}
+
+  .controls-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;}
+  .control-field{display:flex;flex-direction:column;gap:5px;min-width:180px;}
+  .control-field label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.03em;}
+  .control-field select{width:100%;}
+  .control-field.grow{flex:1;min-width:240px;}
+  .designer-select{min-width:260px;}
+  .month-select{min-width:190px;}
+  select, input[type=text], input[type=date]{
+    font-family:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;
+    background:#fff;color:var(--text);outline:none;
+  }
+  select:focus, input:focus{border-color:var(--accent);}
+  .seg{display:inline-flex;background:#EEF0F3;border-radius:8px;padding:3px;}
+  .seg button{border:none;background:none;padding:6px 14px;font-size:13px;font-weight:600;color:var(--text-dim);border-radius:6px;cursor:pointer;font-family:inherit;}
+  .seg button.active{background:#fff;color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .search-box{flex:1;min-width:180px;}
+  .table-wrap{max-height:520px;overflow:auto;border:1px solid var(--border);border-radius:10px;}
+  .table-wrap table{margin:0;}
+  .table-wrap th, .table-wrap td{padding-left:12px;}
+  .result-count{font-size:12.5px;color:var(--text-dim);margin-bottom:8px;}
+  .result-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .result-row .result-count{margin-bottom:0;}
+  .reset-btn{
+    border:1px solid rgba(220,38,38,.35);background:var(--bad-soft);color:var(--bad);
+    padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;
+  }
+  .reset-btn:hover{border-color:var(--bad);}
+  .designer-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+  .stat-inline{display:flex;gap:22px;flex-wrap:wrap;}
+  .stat-inline .si{display:flex;flex-direction:column;}
+  .stat-inline .si .v{font-size:22px;font-weight:700;}
+  .stat-inline .si .l{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.03em;}
+  footer{margin-top:28px;text-align:center;color:var(--text-dim);font-size:12px;}
+  footer a{color:var(--text-dim);}
+  .note{font-size:11.5px;color:var(--text-dim);margin-top:8px;}
+  .loading-banner{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:40px;text-align:center;color:var(--text-dim);font-size:14px;
+  }
+  .loading-banner.error{color:var(--bad);border-color:rgba(220,38,38,.3);}
+  @media (max-width:1000px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .grid-2, .grid-2b, .grid-3{grid-template-columns:1fr;}
+    .control-field, .control-field.grow, .designer-select, .month-select{width:100%;min-width:0;}
+    .seg{width:100%;}
+    .seg button{flex:1;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Creative Room — детальна аналітика</h1>
+      <p id="headerSub">Дизайн-команда · дані з Notion (Design Room) · крео = одиниця креатива (поле «К-сть»)</p>
+    </div>
+    <div class="period-pill" id="periodPill">Завантаження…</div>
+  </header>
+
+  <div class="loading-banner" id="loadingBanner">Завантаження даних з Notion-снапшота…</div>
+
+  <div id="appRoot" style="display:none;">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="overview">Огляд</button>
+      <button class="tab-btn" data-tab="designers">Дизайнери</button>
+      <button class="tab-btn" data-tab="table">Всі крео (таблиця)</button>
+    </div>
+
+    <!-- ================= OVERVIEW TAB ================= -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="kpi-grid">
+        <div class="kpi"><div class="label">Тасок всього</div><div class="value" id="kOvTasks">—</div><div class="sub" id="kOvTasksSub">—</div></div>
+        <div class="kpi"><div class="label">Крео (одиниць)</div><div class="value" id="kOvUnits">—</div><div class="sub" id="kOvUnitsSub">сума поля «К-сть»</div></div>
+        <div class="kpi"><div class="label">Виконано тасок</div><div class="value" id="kOvDone">—</div><div class="sub good" id="kOvDoneSub">—</div></div>
+        <div class="kpi"><div class="label">В роботі / нові</div><div class="value" id="kOvActive">—</div><div class="sub warn">потребують уваги</div></div>
+        <div class="kpi"><div class="label">Темп цього тижня</div><div class="value" id="kOvTrendVal">—</div><div class="sub" id="kOvTrendSub">—</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Крео по тижнях</h3>
+          <div class="card-sub">Кількість одиниць креатива (не тасок), здано за тиждень</div>
+          <div class="chart-box" style="height:270px;"><canvas id="weekChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Тип креатива</h3>
+          <div class="card-sub">З нуля vs адаптація (по тасках)</div>
+          <div class="chart-box" style="height:190px;"><canvas id="typeChart"></canvas></div>
+          <div id="typeLegend" style="margin-top:12px;font-size:13px;"></div>
         </div>
       </div>
 
-      <main>
-        <section class="section active" id="tab-overview">
-          <div class="kpi-grid" id="overviewKpis"></div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Лідерборд дизайнерів</h3>
+          <div class="card-sub">Крео (одиниць) vs кількість тасок · тільки виконані</div>
+          <div class="chart-box" style="height:250px;"><canvas id="designerChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Швидкість по дизайнерах</h3>
+          <div class="card-sub">Середній термін виконання, днів</div>
+          <table class="data-table" id="designerSpeedTable"></table>
+        </div>
+      </div>
 
-          <div class="charts-grid">
-            <div class="chart-card">
-              <div class="chart-title">Пікові дні — навантаження</div>
-              <div class="bar-chart" id="peakDaysChart"></div>
-              <div class="chart-note" id="peakDaysNote"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Формат креативу</div>
-              <div class="bar-chart" id="creativeChart"></div>
-              <div class="split-block">
-                <div class="chart-title">Тип креативу</div>
-                <div class="bar-chart" id="typeChart"></div>
-              </div>
-            </div>
-          </div>
+      <div class="grid-2b">
+        <div class="card">
+          <h3>Топ баєрів</h3>
+          <div class="card-sub">Крео (одиниць) виконано / замовлено</div>
+          <table class="data-table" id="buyerTable"></table>
+        </div>
+        <div class="card">
+          <h3>Топ GEO</h3>
+          <div class="card-sub">Кількість тасок по гео</div>
+          <div class="chart-box" style="height:270px;"><canvas id="geoChart"></canvas></div>
+        </div>
+      </div>
 
-          <div class="chart-card timeline-card">
-            <div class="chart-title">Активність по днях</div>
-            <div class="timeline-chart" id="timelineChart"></div>
-          </div>
-
-          <div class="charts-grid">
-            <div class="chart-card">
-              <div class="chart-title">Пріоритет тасок</div>
-              <div class="bar-chart" id="priorityChart"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Статуси</div>
-              <div class="bar-chart" id="statusChart"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section" id="tab-team">
-          <div class="section-label">Дизайнери — кількість тасок та креативів</div>
-          <div class="designer-grid" id="designerCards"></div>
-
-          <div class="charts-grid team-charts">
-            <div class="chart-card">
-              <div class="chart-title">Дизайнери — кількість креативів</div>
-              <div class="bar-chart" id="designerCreativeChart"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Дизайнери — кількість тасок</div>
-              <div class="bar-chart" id="designerTaskChart"></div>
-            </div>
-          </div>
-
-          <div class="chart-card designer-detail-card" id="designerDetailCard"></div>
-
-          <div class="chart-card">
-            <div class="chart-title">Баєри — замовлення та обсяг</div>
-            <div class="bar-chart" id="buyerChart"></div>
-          </div>
-        </section>
-
-        <section class="section" id="tab-geo">
-          <div class="kpi-grid" id="geoKpis"></div>
-          <div class="charts-grid">
-            <div class="chart-card">
-              <div class="chart-title">Топ GEO за к-стю тасок</div>
-              <div class="bar-chart" id="geoTaskChart"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">Топ GEO за к-стю креативів</div>
-              <div class="bar-chart" id="geoCreativeChart"></div>
-            </div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-title">Мови креативів</div>
-            <div class="tag-list" id="languageTags"></div>
-          </div>
-        </section>
-
-        <section class="section" id="tab-insights">
-          <div class="insights-grid" id="insightCards"></div>
-
-          <div class="chart-card">
-            <div class="chart-title">Аналіз вмісту тасок — типи контенту</div>
-            <div class="content-grid" id="contentCards"></div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-title">Ключові паттерни у завданнях</div>
-            <div class="pattern-list" id="patternList"></div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-title">Таблиця задач</div>
-            <div class="table-actions">
-              <button class="filter-btn" id="exportFiltered">Експорт фільтру</button>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Таска</th>
-                    <th>Дата</th>
-                    <th>Дизайнер</th>
-                    <th>Баєр</th>
-                    <th>К-сть</th>
-                    <th>Статус</th>
-                    <th>GEO</th>
-                  </tr>
-                </thead>
-                <tbody id="taskRows"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </main>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Пріоритети</h3>
+          <div class="card-sub">Розподіл усіх тасок</div>
+          <div class="chart-box" style="height:190px;"><canvas id="priorityChart"></canvas></div>
+        </div>
+        <div class="card" style="grid-column: span 2;">
+          <h3>Найпопулярніші категорії тасок</h3>
+          <div class="card-sub">Топ-10 за назвою таски</div>
+          <div class="chart-box" style="height:190px;"><canvas id="categoryChart"></canvas></div>
+        </div>
+      </div>
     </div>
 
-    <script src="app.js"></script>
-  </body>
+    <!-- ================= DESIGNERS TAB ================= -->
+    <div class="tab-panel" id="tab-designers">
+      <div class="controls-row">
+        <div class="control-field grow designer-select">
+          <label for="designerSelect">Дизайнер</label>
+          <select id="designerSelect"></select>
+        </div>
+        <div class="control-field month-select">
+          <label for="designerMonthSelect">Період</label>
+          <select id="designerMonthSelect"></select>
+        </div>
+        <div class="seg" id="granSeg">
+          <button data-g="day" class="active">День</button>
+          <button data-g="week">Тиждень</button>
+          <button data-g="month">Місяць</button>
+        </div>
+      </div>
+
+      <div class="designer-header">
+        <div class="stat-inline" id="designerStats"></div>
+        <div class="trend-badge flat" id="designerTrend">—</div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3 id="designerChartTitle">Динаміка</h3>
+        <div class="card-sub" id="designerChartSub">Крео (одиниць) за період · натисніть на стовпчик, щоб побачити таски цього періоду</div>
+        <div class="chart-box" style="height:260px;"><canvas id="designerDetailChart"></canvas></div>
+        <div class="note">Останній період на графіку може бути неповним (дані ще накопичуються).</div>
+      </div>
+
+      <div class="card">
+        <h3>Що саме зроблено</h3>
+        <div class="card-sub">Повний перелік тасок вибраного дизайнера, найновіші зверху</div>
+        <div class="result-row">
+          <div class="result-count" id="designerRowCount"></div>
+          <button class="reset-btn" id="periodReset" type="button" hidden>✕ Reset</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="designerTaskTable"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= FULL TABLE TAB ================= -->
+    <div class="tab-panel" id="tab-table">
+      <div class="controls-row">
+        <input type="text" class="search-box" id="searchBox" placeholder="Пошук: ID, назва, GEO, баєр...">
+        <select id="fDesigner"><option value="">Дизайнер: всі</option></select>
+        <select id="fBuyer"><option value="">Баєр: всі</option></select>
+        <select id="fGeo"><option value="">GEO: всі</option></select>
+        <select id="fStatus"><option value="">Статус: всі</option></select>
+        <select id="fType"><option value="">Тип: всі</option></select>
+        <select id="fPriority"><option value="">Пріоритет: всі</option></select>
+      </div>
+      <div class="result-count" id="tableRowCount"></div>
+      <div class="table-wrap" style="max-height:640px;">
+        <table class="data-table" id="fullTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <footer>Джерело: авто-синхронізація бази Design Room з Notion (GitHub Actions) · <a href="old.html">стара версія дашборда</a></footer>
+</div>
+
+<script>
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#6B7280';
+Chart.defaults.font.size = 12;
+const ACCENT = '#0066FF';
+const PALETTE = ['#0066FF','#7C3AED','#16A34A','#F59E0B','#DC2626','#0891B2','#DB2777','#65A30D','#EA580C','#4B5563'];
+
+// ---------- helpers ----------
+function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]); }
+function shortName(full){ if(!full) return 'Не вказано'; const m = full.match(/\(([^)]+)\)/); return m ? m[1] : full; }
+function handlePart(full){ if(!full) return ''; const idx = full.indexOf('('); return idx>-1 ? full.slice(0,idx) : full; }
+function qtyOf(t){ return t.qty!=null ? t.qty : 1; }
+function parseISO(s){ return new Date(s+'T00:00:00'); }
+function fmtDate(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+const MONTH_NAMES_SHORT = ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+const MONTH_NAMES_FULL = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+function isoWeekStart(d){ const day=(d.getDay()+6)%7; const start=new Date(d); start.setDate(d.getDate()-day); return start; }
+function dayKey(s){ return s; }
+function weekKey(s){ return fmtDate(isoWeekStart(parseISO(s))); }
+function monthKey(s){ return s.slice(0,7); }
+function keyFn(g){ return g==='day'?dayKey : g==='week'?weekKey : monthKey; }
+function fmtPeriodLabel(key, g){
+  if(g==='month'){ const [y,m]=key.split('-'); return MONTH_NAMES_SHORT[parseInt(m)-1]+' '+y; }
+  return key.slice(5);
+}
+function fmtPeriodFull(key, g){
+  if(g==='month'){ const [y,m]=key.split('-'); return MONTH_NAMES_FULL[parseInt(m)-1]+' '+y; }
+  if(g==='week'){ return 'тиждень з '+key.slice(8,10)+'.'+key.slice(5,7); }
+  return key.slice(8,10)+'.'+key.slice(5,7)+'.'+key.slice(0,4);
+}
+function fmtMonthFilterLabel(key){
+  const [y,m]=key.split('-');
+  return MONTH_NAMES_FULL[parseInt(m)-1]+' '+y;
+}
+function isDone(t){ return (t.status||'').toLowerCase().includes('викон'); }
+function statusTag(status){
+  const s=(status||'').toLowerCase();
+  if(s.includes('викон')) return '<span class="tag status-done">Виконано</span>';
+  if(s.includes('проц')) return '<span class="tag status-progress">В процесі</span>';
+  if(s.includes('нова')) return '<span class="tag status-new">Нова</span>';
+  if(s.includes('перев')) return '<span class="tag status-progress">Перевірка</span>';
+  return `<span class="tag status-other">${esc(status)||'—'}</span>`;
+}
+function prioTag(p){
+  if(p==='Critical') return '<span class="tag critical">Critical</span>';
+  if(p==='High') return '<span class="tag high">High</span>';
+  if(p==='Medium') return '<span class="tag medium">Medium</span>';
+  return p ? `<span class="tag medium">${esc(p)}</span>` : '—';
+}
+
+// ---------- data loading: assets/latest-data.json is auto-synced from Notion by GitHub Actions ----------
+let TASKS = [];
+let META = {};
+let doneTasks = [];
+
+function dateOnly(v){
+  const s = String(v||'').trim();
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0,10) : '';
+}
+
+function mapSnapshotRow(r){
+  const created = dateOnly(r['Дата створення']);
+  const start = dateOnly(r['Дата взяття в роботу']);
+  const done = dateOnly(r['Дата видачі']);
+  const qtyRaw = parseFloat(String(r['К-сть']||'').replace(',', '.'));
+  let turnaround = null;
+  if(start && done){
+    const diff = (parseISO(done)-parseISO(start))/86400000;
+    if(diff>=0) turnaround = diff;
+  }
+  return {
+    id: (r['Id']||'').trim(),
+    task: (r['Таска']||'').trim(),
+    geo: (r['GEO']||'').trim(),
+    buyer: (r['Баєр']||'').trim(),
+    designer: (r['Дизайнер']||'').trim(),
+    type: (r['Тип креатива:']||'').trim(),
+    priority: (r['Пріорітет']||'').trim(),
+    qty: Number.isFinite(qtyRaw) ? qtyRaw : null,
+    status: (r['Статус таски']||'').trim(),
+    eff_date: done || start || created,
+    turnaround,
+  };
+}
+
+function buildMeta(){
+  const uniq = (fn) => Array.from(new Set(TASKS.map(fn).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'uk'));
+  const unitsByDesigner = {};
+  doneTasks.forEach(t=>{ if(t.designer) unitsByDesigner[t.designer]=(unitsByDesigner[t.designer]||0)+qtyOf(t); });
+  META = {
+    designers: uniq(t=>t.designer).sort((a,b)=>(unitsByDesigner[b]||0)-(unitsByDesigner[a]||0)),
+    buyers: uniq(t=>t.buyer),
+    geos: uniq(t=>t.geo),
+    statuses: uniq(t=>t.status),
+    types: uniq(t=>t.type).filter(t=>t!=='-'),
+    priorities: uniq(t=>t.priority),
+  };
+}
+
+async function loadData(){
+  const res = await fetch('assets/latest-data.json', { cache: 'no-store' });
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const snapshot = await res.json();
+  if(!snapshot || !Array.isArray(snapshot.rows)) throw new Error('Invalid snapshot');
+  TASKS = snapshot.rows.map(mapSnapshotRow).filter(t=>t.id || t.task);
+  doneTasks = TASKS.filter(isDone);
+  buildMeta();
+  return snapshot;
+}
+
+// ================= TAB SWITCHING =================
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ================= OVERVIEW =================
+function buildOverview(){
+  const total = TASKS.length;
+  const done = doneTasks.length;
+  const active = TASKS.filter(t=>['Нова таска','В процесі','Перевірка','Hold'].includes(t.status)).length;
+  const totalUnits = doneTasks.reduce((s,t)=>s+qtyOf(t),0);
+
+  document.getElementById('kOvTasks').textContent = total;
+  document.getElementById('kOvTasksSub').textContent = `${done} виконано, ${active} активні`;
+  document.getElementById('kOvUnits').textContent = totalUnits;
+  document.getElementById('kOvDone').textContent = done;
+  document.getElementById('kOvDoneSub').textContent = total ? `${(done/total*100).toFixed(0)}% від загальної кількості` : '—';
+  document.getElementById('kOvActive').textContent = active;
+
+  // weekly units
+  const wk = {};
+  doneTasks.forEach(t=>{ if(!t.eff_date) return; const k=weekKey(t.eff_date); wk[k]=(wk[k]||0)+qtyOf(t); });
+  const wkKeys = Object.keys(wk).sort();
+  new Chart(document.getElementById('weekChart'), {
+    type:'bar',
+    data:{ labels: wkKeys.map(k=>fmtPeriodLabel(k,'week')), datasets:[{label:'Крео', data: wkKeys.map(k=>wk[k]), backgroundColor:ACCENT, borderRadius:5, maxBarThickness:34}] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, x:{grid:{display:false}} } }
+  });
+
+  // trend: last vs prev week
+  if(wkKeys.length>=2){
+    const last = wk[wkKeys[wkKeys.length-1]];
+    const prev = wk[wkKeys[wkKeys.length-2]];
+    const diff = prev>0 ? ((last-prev)/prev*100) : 0;
+    document.getElementById('kOvTrendVal').textContent = last;
+    const sub = document.getElementById('kOvTrendSub');
+    sub.textContent = `${diff>=0?'▲':'▼'} ${Math.abs(diff).toFixed(0)}% до попереднього тижня`;
+    sub.className = 'sub ' + (diff>=0?'good':'warn');
+  }
+
+  // type donut
+  const typeEntries = Object.entries(TASKS.reduce((acc,t)=>{ if(t.type && t.type!=='-'){ acc[t.type]=(acc[t.type]||0)+1; } return acc; },{})).sort((a,b)=>b[1]-a[1]);
+  new Chart(document.getElementById('typeChart'), {
+    type:'doughnut',
+    data:{ labels: typeEntries.map(e=>e[0]), datasets:[{data: typeEntries.map(e=>e[1]), backgroundColor:PALETTE, borderWidth:0}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false}} }
+  });
+  const typeTotal = typeEntries.reduce((s,e)=>s+e[1],0) || 1;
+  document.getElementById('typeLegend').innerHTML = typeEntries.map((e,i)=>{
+    const color = PALETTE[i%PALETTE.length];
+    const pct = (e[1]/typeTotal*100).toFixed(0);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;">
+      <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${color};margin-right:8px;"></span>${esc(e[0])}</span>
+      <b>${e[1]} · ${pct}%</b>
+    </div>`;
+  }).join('');
+
+  // designer leaderboard (units vs tasks)
+  const designers = META.designers;
+  const dUnits = designers.map(d=>doneTasks.filter(t=>t.designer===d).reduce((s,t)=>s+qtyOf(t),0));
+  const dTasks = designers.map(d=>doneTasks.filter(t=>t.designer===d).length);
+  new Chart(document.getElementById('designerChart'), {
+    type:'bar',
+    data:{ labels: designers.map(shortName), datasets:[
+      {label:'Крео (одиниць)', data:dUnits, backgroundColor:ACCENT, borderRadius:5, maxBarThickness:26},
+      {label:'Тасок', data:dTasks, backgroundColor:'#DCE6FF', borderRadius:5, maxBarThickness:26}
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top', align:'end', labels:{boxWidth:10, usePointStyle:true, pointStyle:'circle'}}}, scales:{ y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, x:{grid:{display:false}} } }
+  });
+
+  // designer speed table
+  const speedRows = designers.map(d=>{
+    const arr = doneTasks.filter(t=>t.designer===d && t.turnaround!=null).map(t=>t.turnaround);
+    const avg = arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+    return [d, avg];
+  }).filter(r=>r[1]!=null).sort((a,b)=>a[1]-b[1]);
+  const maxTurn = Math.max(1, ...speedRows.map(r=>r[1]));
+  document.getElementById('designerSpeedTable').innerHTML = `<tr><th>Дизайнер</th><th>Днів у сер.</th></tr>` +
+    speedRows.map(([name,val])=>`<tr>
+      <td class="name-cell">${esc(shortName(name))}<br><span class="handle">${esc(handlePart(name))}</span></td>
+      <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(val/maxTurn*100).toFixed(0)}%"></div></div><b>${val.toFixed(1)}</b></div></td>
+    </tr>`).join('');
+
+  // buyer table (top10 by units)
+  const buyerUnits = {};
+  const buyerUnitsDone = {};
+  TASKS.forEach(t=>{ if(!t.buyer) return; buyerUnits[t.buyer]=(buyerUnits[t.buyer]||0)+qtyOf(t); });
+  doneTasks.forEach(t=>{ if(!t.buyer) return; buyerUnitsDone[t.buyer]=(buyerUnitsDone[t.buyer]||0)+qtyOf(t); });
+  const buyerRows = Object.entries(buyerUnits).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxBuyer = Math.max(1, ...buyerRows.map(r=>r[1]));
+  document.getElementById('buyerTable').innerHTML = `<tr><th>Баєр</th><th>Крео виконано / всього</th></tr>` +
+    buyerRows.map(([name,val])=>{
+      const d = buyerUnitsDone[name]||0;
+      return `<tr>
+        <td class="name-cell">${esc(name)}</td>
+        <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(val/maxBuyer*100).toFixed(0)}%"></div></div><b>${d} / ${val}</b></div></td>
+      </tr>`;
+    }).join('');
+
+  // geo chart (by task count)
+  const geoCounts = {};
+  TASKS.forEach(t=>{ if(!t.geo) return; geoCounts[t.geo]=(geoCounts[t.geo]||0)+1; });
+  const geoEntries = Object.entries(geoCounts).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  new Chart(document.getElementById('geoChart'), {
+    type:'bar',
+    data:{ labels: geoEntries.map(e=>e[0]), datasets:[{data: geoEntries.map(e=>e[1]), backgroundColor:ACCENT, borderRadius:5}] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, y:{grid:{display:false}} } }
+  });
+
+  // priority donut
+  const prioColors = {'Medium':'#9CA3AF','High':'#F59E0B','Critical':'#DC2626'};
+  const prioCounts = {};
+  TASKS.forEach(t=>{ if(!t.priority) return; prioCounts[t.priority]=(prioCounts[t.priority]||0)+1; });
+  const prioEntries = Object.entries(prioCounts).sort((a,b)=>b[1]-a[1]);
+  new Chart(document.getElementById('priorityChart'), {
+    type:'doughnut',
+    data:{ labels: prioEntries.map(e=>e[0]), datasets:[{data: prioEntries.map(e=>e[1]), backgroundColor: prioEntries.map((e,i)=>prioColors[e[0]]||PALETTE[i%PALETTE.length]), borderWidth:0}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{position:'right', labels:{boxWidth:10, usePointStyle:true, pointStyle:'circle'}}} }
+  });
+
+  // category chart
+  const catCounts = {};
+  TASKS.forEach(t=>{ if(!t.task) return; catCounts[t.task]=(catCounts[t.task]||0)+1; });
+  const catEntries = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  new Chart(document.getElementById('categoryChart'), {
+    type:'bar',
+    data:{ labels: catEntries.map(e=>e[0].length>28?e[0].slice(0,27)+'…':e[0]), datasets:[{data: catEntries.map(e=>e[1]), backgroundColor:PALETTE, borderRadius:5, maxBarThickness:40}] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, x:{grid:{display:false}, ticks:{maxRotation:30}} } }
+  });
+}
+
+// ================= DESIGNERS TAB =================
+let currentGran = 'day';
+let selectedPeriod = '';
+let designerChartInstance = null;
+
+const designerSelect = document.getElementById('designerSelect');
+const designerMonthSelect = document.getElementById('designerMonthSelect');
+
+function getDesignerMonths(designer){
+  return Array.from(new Set(
+    TASKS.filter(t=>t.designer===designer && t.eff_date).map(t=>monthKey(t.eff_date))
+  )).sort().reverse();
+}
+
+function fillDesignerMonthSelect(keepValue=true){
+  const prev = keepValue ? designerMonthSelect.value : '';
+  const months = getDesignerMonths(designerSelect.value);
+  designerMonthSelect.innerHTML = '<option value="">Усі місяці</option>' +
+    months.map(m=>`<option value="${m}">${fmtMonthFilterLabel(m)}</option>`).join('');
+  designerMonthSelect.value = months.includes(prev) ? prev : '';
+}
+
+function initDesignerTab(){
+  META.designers.forEach(d=>{
+    const opt = document.createElement('option'); opt.value=d;
+    opt.textContent = shortName(d)+(handlePart(d)?' ('+handlePart(d)+')':'');
+    designerSelect.appendChild(opt);
+  });
+  designerSelect.value = META.designers[0] || '';
+  fillDesignerMonthSelect(false);
+
+  document.getElementById('granSeg').addEventListener('click', e=>{
+    if(e.target.tagName!=='BUTTON') return;
+    document.querySelectorAll('#granSeg button').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentGran = e.target.dataset.g;
+    selectedPeriod = '';
+    renderDesigner();
+  });
+  designerSelect.addEventListener('change', ()=>{
+    fillDesignerMonthSelect();
+    selectedPeriod = '';
+    renderDesigner();
+  });
+  designerMonthSelect.addEventListener('change', ()=>{ selectedPeriod=''; renderDesigner(); });
+  document.getElementById('periodReset').addEventListener('click', ()=>{ selectedPeriod=''; renderDesigner(); });
+
+  renderDesigner();
+}
+
+function renderDesigner(){
+  const d = designerSelect.value;
+  const selectedMonth = designerMonthSelect.value;
+  const inSelectedMonth = t => !selectedMonth || (t.eff_date && monthKey(t.eff_date)===selectedMonth);
+  const myDone = doneTasks.filter(t=>t.designer===d && inSelectedMonth(t));
+  const myAll = TASKS.filter(t=>t.designer===d && inSelectedMonth(t));
+  const totalUnits = myDone.reduce((s,t)=>s+qtyOf(t),0);
+  const totalTasks = myDone.length;
+  const arrTurn = myDone.filter(t=>t.turnaround!=null).map(t=>t.turnaround);
+  const avgTurn = arrTurn.length? (arrTurn.reduce((a,b)=>a+b,0)/arrTurn.length).toFixed(2) : '—';
+
+  document.getElementById('designerStats').innerHTML = `
+    <div class="si"><div class="v">${totalUnits}</div><div class="l">Крео (одиниць)</div></div>
+    <div class="si"><div class="v">${totalTasks}</div><div class="l">Тасок виконано</div></div>
+    <div class="si"><div class="v">${myAll.length-totalTasks}</div><div class="l">Активних тасок</div></div>
+    <div class="si"><div class="v">${avgTurn}</div><div class="l">Дн. в сер. на таску</div></div>
+  `;
+
+  // grouping
+  const kf = keyFn(currentGran);
+  const grouped = {};
+  myDone.forEach(t=>{ if(!t.eff_date) return; const k=kf(t.eff_date); grouped[k]=(grouped[k]||0)+qtyOf(t); });
+  const keys = Object.keys(grouped).sort();
+  if(selectedPeriod && !keys.includes(selectedPeriod)) selectedPeriod = '';
+
+  const gLabel = currentGran==='day'?'день':currentGran==='week'?'тиждень':'місяць';
+  const periodLabel = selectedMonth ? ` · ${fmtMonthFilterLabel(selectedMonth)}` : '';
+  document.getElementById('designerChartSub').textContent =
+    `Крео (одиниць) за ${gLabel}${periodLabel} · натисніть на стовпчик, щоб побачити таски цього періоду`;
+
+  if(designerChartInstance) designerChartInstance.destroy();
+  designerChartInstance = new Chart(document.getElementById('designerDetailChart'), {
+    type:'bar',
+    data:{
+      labels: keys.map(k=>fmtPeriodLabel(k,currentGran)),
+      datasets:[{
+        label:'Крео',
+        data: keys.map(k=>grouped[k]),
+        backgroundColor: keys.map(k=>k===selectedPeriod ? '#DC2626' : ACCENT),
+        borderRadius:5,
+        maxBarThickness: currentGran==='day'?14:40
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      onHover:(evt, els)=>{ evt.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+      onClick:(evt, els)=>{
+        if(!els.length) return;
+        const key = keys[els[0].index];
+        selectedPeriod = selectedPeriod===key ? '' : key;
+        renderDesigner();
+      },
+      plugins:{legend:{display:false}},
+      scales:{ y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, x:{grid:{display:false}, ticks:{autoSkip:true, maxRotation:0}} }
+    }
+  });
+
+  // trend badge: last vs prev period
+  const trendEl = document.getElementById('designerTrend');
+  if(keys.length>=2){
+    const last = grouped[keys[keys.length-1]];
+    const prev = grouped[keys[keys.length-2]];
+    const diff = prev>0 ? ((last-prev)/prev*100) : (last>0?100:0);
+    const dir = diff>0.5?'up':diff<-0.5?'down':'flat';
+    const arrow = dir==='up'?'▲':dir==='down'?'▼':'●';
+    trendEl.className = 'trend-badge '+dir;
+    trendEl.textContent = `${arrow} ${Math.abs(diff).toFixed(0)}% ${last} vs ${prev} (попередній ${gLabel})`;
+  } else {
+    trendEl.className = 'trend-badge flat';
+    trendEl.textContent = 'Недостатньо даних для тренду';
+  }
+
+  // detail table (optionally filtered by clicked period)
+  let rows = myAll.slice();
+  if(selectedPeriod){
+    rows = rows.filter(t=>t.eff_date && kf(t.eff_date)===selectedPeriod);
+  }
+  rows.sort((a,b)=> (b.eff_date||'').localeCompare(a.eff_date||''));
+
+  const countEl = document.getElementById('designerRowCount');
+  countEl.textContent = selectedPeriod
+    ? `${rows.length} тасок за ${fmtPeriodFull(selectedPeriod, currentGran)}`
+    : `${rows.length} тасок`;
+  document.getElementById('periodReset').hidden = !selectedPeriod;
+
+  document.getElementById('designerTaskTable').innerHTML = `
+    <tr><th>ID</th><th>Назва</th><th>Тип</th><th>GEO</th><th>Баєр</th><th>Крео</th><th>Дата</th><th>Статус</th></tr>
+    ${rows.map(t=>`<tr>
+      <td>${esc(t.id)||'—'}</td>
+      <td>${esc(t.task)||'—'}</td>
+      <td>${esc(t.type)||'—'}</td>
+      <td>${esc(t.geo)||'—'}</td>
+      <td>${esc(t.buyer)||'—'}</td>
+      <td>${t.qty!=null?t.qty:'—'}</td>
+      <td>${esc(t.eff_date)||'—'}</td>
+      <td>${statusTag(t.status)}</td>
+    </tr>`).join('')}
+  `;
+}
+
+// ================= FULL TABLE TAB =================
+function fillFilterSelect(id, list){
+  const el = document.getElementById(id);
+  list.forEach(v=>{ const opt=document.createElement('option'); opt.value=v; opt.textContent=v; el.appendChild(opt); });
+}
+
+function initFullTable(){
+  fillFilterSelect('fDesigner', META.designers.map(shortName).filter((v,i,a)=>a.indexOf(v)===i));
+  fillFilterSelect('fBuyer', META.buyers);
+  fillFilterSelect('fGeo', META.geos);
+  fillFilterSelect('fStatus', META.statuses);
+  fillFilterSelect('fType', META.types);
+  fillFilterSelect('fPriority', META.priorities);
+  ['searchBox','fDesigner','fBuyer','fGeo','fStatus','fType','fPriority'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', renderFullTable);
+    document.getElementById(id).addEventListener('change', renderFullTable);
+  });
+  renderFullTable();
+}
+
+function renderFullTable(){
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const fD = document.getElementById('fDesigner').value;
+  const fB = document.getElementById('fBuyer').value;
+  const fG = document.getElementById('fGeo').value;
+  const fS = document.getElementById('fStatus').value;
+  const fT = document.getElementById('fType').value;
+  const fP = document.getElementById('fPriority').value;
+
+  let rows = TASKS.filter(t=>{
+    if(fD && shortName(t.designer)!==fD) return false;
+    if(fB && t.buyer!==fB) return false;
+    if(fG && t.geo!==fG) return false;
+    if(fS && t.status!==fS) return false;
+    if(fT && t.type!==fT) return false;
+    if(fP && t.priority!==fP) return false;
+    if(q){
+      const hay = `${t.id} ${t.task} ${t.geo} ${t.buyer} ${t.designer}`.toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  rows.sort((a,b)=> (b.eff_date||'').localeCompare(a.eff_date||''));
+
+  const totalUnits = rows.reduce((s,t)=>s+qtyOf(t),0);
+  document.getElementById('tableRowCount').textContent = `${rows.length} тасок · ${totalUnits} крео (одиниць)`;
+
+  document.getElementById('fullTable').innerHTML = `
+    <tr><th>ID</th><th>Назва</th><th>Дизайнер</th><th>Баєр</th><th>GEO</th><th>Тип</th><th>Крео</th><th>Пріоритет</th><th>Дата</th><th>Статус</th></tr>
+    ${rows.map(t=>`<tr>
+      <td>${esc(t.id)||'—'}</td>
+      <td>${esc(t.task)||'—'}</td>
+      <td>${esc(shortName(t.designer))}</td>
+      <td>${esc(t.buyer)||'—'}</td>
+      <td>${esc(t.geo)||'—'}</td>
+      <td>${esc(t.type)||'—'}</td>
+      <td>${t.qty!=null?t.qty:'—'}</td>
+      <td>${prioTag(t.priority)}</td>
+      <td>${esc(t.eff_date)||'—'}</td>
+      <td>${statusTag(t.status)}</td>
+    </tr>`).join('')}
+  `;
+}
+
+// ================= INIT =================
+(async function init(){
+  const banner = document.getElementById('loadingBanner');
+  try{
+    const snapshot = await loadData();
+    banner.style.display = 'none';
+    document.getElementById('appRoot').style.display = '';
+
+    const allDates = TASKS.map(t=>t.eff_date).filter(Boolean).sort();
+    document.getElementById('periodPill').textContent = allDates.length
+      ? `${allDates[0]} → ${allDates[allDates.length-1]}` : '—';
+    if(snapshot.generatedAt){
+      document.getElementById('headerSub').textContent =
+        `Дизайн-команда · авто-синхронізація з Notion · оновлено ${new Date(snapshot.generatedAt).toLocaleString('uk-UA')} · крео = одиниця креатива (поле «К-сть»)`;
+    }
+
+    buildOverview();
+    initDesignerTab();
+    initFullTable();
+  }catch(err){
+    console.error(err);
+    banner.classList.add('error');
+    banner.textContent = 'Не вдалося завантажити assets/latest-data.json. Перевірте, чи відпрацював GitHub Actions workflow "Notion Live Sync".';
+    document.getElementById('periodPill').textContent = 'Немає даних';
+  }
+})();
+</script>
+</body>
 </html>
