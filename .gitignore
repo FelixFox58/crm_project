@@ -1,3 +1,7 @@
 assets/*.csv
 .DS_Store
 *.log
+scratch/
+*.zip
+Demo/
+Demo.zip
