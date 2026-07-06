@@ -4,36 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Creative Room — детальна аналітика</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#F7F8FA; --card:#FFFFFF; --border:#E4E7EC;
+    --bg:#F3F5F9; --card:#FFFFFF; --border:#E5E8EF;
     --text:#0F1420; --text-dim:#6B7280; --accent:#0066FF; --accent-soft:#EAF1FF;
-    --good:#16A34A; --good-soft:#EAFBEF; --warn:#F59E0B; --bad:#DC2626; --bad-soft:#FDECEC;
-    --radius:14px;
+    --good:#16A34A; --good-soft:#EAFBEF; --warn:#F59E0B; --warn-soft:#FEF3E2;
+    --bad:#DC2626; --bad-soft:#FDECEC; --violet:#7C3AED; --violet-soft:#F1EAFE;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.05);
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;}
+  body{
+    margin:0;color:var(--text);
+    background:linear-gradient(180deg,#EBF0F8 0%,var(--bg) 320px);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
   .wrap{max-width:1280px;margin:0 auto;padding:28px 24px 64px;}
 
-  header.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:16px;}
-  header.top h1{font-size:21px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em;}
-  header.top p{margin:0;color:var(--text-dim);font-size:13px;}
-  .period-pill{background:var(--accent-soft);color:var(--accent);padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;}
-
-  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:22px;}
-  .tab-btn{
-    background:none;border:none;padding:10px 16px;font-size:14px;font-weight:600;color:var(--text-dim);
-    cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;
+  header.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:16px;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand-badge{
+    width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#0066FF,#4D8DFF);color:#fff;font-weight:800;font-size:16px;letter-spacing:-0.5px;
+    box-shadow:0 4px 12px rgba(0,102,255,.28);
   }
-  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  header.top h1{font-size:22px;font-weight:800;margin:0;letter-spacing:-0.02em;}
+  header.top p{margin:2px 0 0;color:var(--text-dim);font-size:13px;}
+  .pills{display:flex;gap:8px;flex-wrap:wrap;}
+  .pill{
+    background:var(--card);border:1px solid var(--border);color:var(--text-dim);
+    padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;box-shadow:var(--shadow);
+  }
+  .pill.accent{background:var(--accent-soft);border-color:transparent;color:var(--accent);}
+
+  .tabs{
+    display:inline-flex;gap:2px;background:#E7EBF2;border-radius:12px;padding:4px;margin-bottom:24px;
+  }
+  .tab-btn{
+    background:none;border:none;padding:9px 20px;font-size:13.5px;font-weight:600;color:var(--text-dim);
+    cursor:pointer;border-radius:9px;font-family:inherit;transition:color .15s;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(16,24,40,.12);}
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
 
-  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
-  .kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
-  .kpi .label{font-size:11.5px;color:var(--text-dim);font-weight:600;margin-bottom:7px;text-transform:uppercase;letter-spacing:.03em;}
-  .kpi .value{font-size:25px;font-weight:700;letter-spacing:-0.02em;line-height:1;}
+  .section-head{display:flex;align-items:baseline;gap:12px;margin:28px 0 12px;}
+  .section-head.first{margin-top:0;}
+  .section-head h2{font-size:15px;font-weight:700;margin:0;letter-spacing:-0.01em;white-space:nowrap;}
+  .section-head span{font-size:12.5px;color:var(--text-dim);}
+  .section-head::after{content:'';flex:1;height:1px;background:var(--border);align-self:center;}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px;}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+  .kpi-top{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .kpi-ic{
+    width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:15px;background:var(--accent-soft);flex:none;
+  }
+  .kpi.green .kpi-ic{background:var(--good-soft);}
+  .kpi.amber .kpi-ic{background:var(--warn-soft);}
+  .kpi.violet .kpi-ic{background:var(--violet-soft);}
+  .kpi .label{font-size:11px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .kpi .value{font-size:26px;font-weight:800;letter-spacing:-0.02em;line-height:1;}
   .kpi .sub{font-size:12px;color:var(--text-dim);margin-top:6px;}
   .kpi .sub.good{color:var(--good);} .kpi .sub.warn{color:var(--warn);}
 
@@ -41,8 +79,8 @@
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
   .grid-2b{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
-  .card h3{margin:0 0 2px;font-size:14px;font-weight:600;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
+  .card h3{margin:0 0 2px;font-size:14px;font-weight:700;}
   .card .card-sub{font-size:12px;color:var(--text-dim);margin-bottom:12px;}
   .chart-box{position:relative;}
 
@@ -50,7 +88,8 @@
   table.data-table th{text-align:left;color:var(--text-dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:0 8px 9px 0;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--card);}
   table.data-table td{padding:8px 8px 8px 0;border-bottom:1px solid #F0F1F4;}
   table.data-table tr:last-child td{border-bottom:none;}
-  table.data-table tr:hover td{background:#FAFBFD;}
+  table.data-table tbody tr:nth-child(even) td{background:#FAFBFD;}
+  table.data-table tr:hover td{background:#F3F7FF;}
   .name-cell{font-weight:600;} .handle{color:var(--text-dim);font-weight:400;font-size:11.5px;}
   .bar-cell{display:flex;align-items:center;gap:8px;}
   .bar-track{flex:1;height:6px;background:#EEF0F3;border-radius:3px;overflow:hidden;min-width:50px;}
@@ -95,10 +134,16 @@
   }
   .reset-btn:hover{border-color:var(--bad);}
   .designer-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
-  .stat-inline{display:flex;gap:22px;flex-wrap:wrap;}
-  .stat-inline .si{display:flex;flex-direction:column;}
-  .stat-inline .si .v{font-size:22px;font-weight:700;}
-  .stat-inline .si .l{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.03em;}
+  .stat-inline{display:flex;gap:10px;flex-wrap:wrap;}
+  .stat-card{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:10px 16px;min-width:120px;box-shadow:var(--shadow);border-left:3px solid var(--accent);
+  }
+  .stat-card.green{border-left-color:var(--good);}
+  .stat-card.amber{border-left-color:var(--warn);}
+  .stat-card.violet{border-left-color:var(--violet);}
+  .stat-card .v{font-size:21px;font-weight:800;letter-spacing:-0.02em;}
+  .stat-card .l{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:2px;}
   footer{margin-top:28px;text-align:center;color:var(--text-dim);font-size:12px;}
   footer a{color:var(--text-dim);}
   .note{font-size:11.5px;color:var(--text-dim);margin-top:8px;}
@@ -120,37 +165,45 @@
 <div class="wrap">
 
   <header class="top">
-    <div>
-      <h1>Creative Room — детальна аналітика</h1>
-      <p id="headerSub">Дизайн-команда · дані з Notion (Design Room) · крео = одиниця креатива (поле «К-сть»)</p>
+    <div class="brand">
+      <div class="brand-badge">CR</div>
+      <div>
+        <h1>Creative Room</h1>
+        <p id="headerSub">Аналітика дизайн-команди · крео = одиниця креатива (поле «К-сть»)</p>
+      </div>
     </div>
-    <div class="period-pill" id="periodPill">Завантаження…</div>
+    <div class="pills">
+      <div class="pill" id="updatedPill" hidden>—</div>
+      <div class="pill accent" id="periodPill">Завантаження…</div>
+    </div>
   </header>
 
   <div class="loading-banner" id="loadingBanner">Завантаження даних з Notion-снапшота…</div>
 
   <div id="appRoot" style="display:none;">
     <div class="tabs">
-      <button class="tab-btn active" data-tab="overview">Огляд</button>
-      <button class="tab-btn" data-tab="designers">Дизайнери</button>
-      <button class="tab-btn" data-tab="table">Всі крео (таблиця)</button>
+      <button class="tab-btn active" data-tab="overview">📊 Огляд</button>
+      <button class="tab-btn" data-tab="designers">🎨 Дизайнери</button>
+      <button class="tab-btn" data-tab="table">📋 Всі крео</button>
     </div>
 
     <!-- ================= OVERVIEW TAB ================= -->
     <div class="tab-panel active" id="tab-overview">
       <div class="kpi-grid">
-        <div class="kpi"><div class="label">Тасок всього</div><div class="value" id="kOvTasks">—</div><div class="sub" id="kOvTasksSub">—</div></div>
-        <div class="kpi"><div class="label">Крео (одиниць)</div><div class="value" id="kOvUnits">—</div><div class="sub" id="kOvUnitsSub">сума поля «К-сть»</div></div>
-        <div class="kpi"><div class="label">Виконано тасок</div><div class="value" id="kOvDone">—</div><div class="sub good" id="kOvDoneSub">—</div></div>
-        <div class="kpi"><div class="label">В роботі / нові</div><div class="value" id="kOvActive">—</div><div class="sub warn">потребують уваги</div></div>
-        <div class="kpi"><div class="label">Темп цього тижня</div><div class="value" id="kOvTrendVal">—</div><div class="sub" id="kOvTrendSub">—</div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-ic">📋</span><span class="label">Тасок всього</span></div><div class="value" id="kOvTasks">—</div><div class="sub" id="kOvTasksSub">—</div></div>
+        <div class="kpi"><div class="kpi-top"><span class="kpi-ic">🎨</span><span class="label">Крео (одиниць)</span></div><div class="value" id="kOvUnits">—</div><div class="sub" id="kOvUnitsSub">сума поля «К-сть»</div></div>
+        <div class="kpi green"><div class="kpi-top"><span class="kpi-ic">✅</span><span class="label">Виконано тасок</span></div><div class="value" id="kOvDone">—</div><div class="sub good" id="kOvDoneSub">—</div></div>
+        <div class="kpi amber"><div class="kpi-top"><span class="kpi-ic">⏳</span><span class="label">В роботі / нові</span></div><div class="value" id="kOvActive">—</div><div class="sub warn">потребують уваги</div></div>
+        <div class="kpi violet"><div class="kpi-top"><span class="kpi-ic">⚡</span><span class="label">Темп цього тижня</span></div><div class="value" id="kOvTrendVal">—</div><div class="sub" id="kOvTrendSub">—</div></div>
       </div>
 
+      <div class="section-head"><h2>📈 Обсяг виробництва</h2><span>скільки крео команда здає і в якому темпі</span></div>
       <div class="grid-2">
         <div class="card">
           <h3>Крео по тижнях</h3>
           <div class="card-sub">Кількість одиниць креатива (не тасок), здано за тиждень</div>
           <div class="chart-box" style="height:270px;"><canvas id="weekChart"></canvas></div>
+          <div class="note">Останній стовпчик — поточний тиждень, дані ще накопичуються.</div>
         </div>
         <div class="card">
           <h3>Тип креатива</h3>
@@ -160,6 +213,7 @@
         </div>
       </div>
 
+      <div class="section-head"><h2>👥 Команда</h2><span>хто скільки робить і як швидко</span></div>
       <div class="grid-2">
         <div class="card">
           <h3>Лідерборд дизайнерів</h3>
@@ -168,11 +222,12 @@
         </div>
         <div class="card">
           <h3>Швидкість по дизайнерах</h3>
-          <div class="card-sub">Середній термін виконання, днів</div>
+          <div class="card-sub">Середній термін виконання, днів (менше — краще)</div>
           <table class="data-table" id="designerSpeedTable"></table>
         </div>
       </div>
 
+      <div class="section-head"><h2>🌍 Замовники та географія</h2><span>хто замовляє і на які ринки</span></div>
       <div class="grid-2b">
         <div class="card">
           <h3>Топ баєрів</h3>
@@ -186,6 +241,7 @@
         </div>
       </div>
 
+      <div class="section-head"><h2>🧩 Структура тасок</h2><span>з чого складається потік завдань</span></div>
       <div class="grid-3">
         <div class="card">
           <h3>Пріоритети</h3>
@@ -268,11 +324,19 @@
 Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.color = '#6B7280';
 Chart.defaults.font.size = 12;
+Chart.defaults.plugins.tooltip.backgroundColor = '#0F1420';
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.tooltip.titleFont = { weight: '700' };
+Chart.defaults.plugins.tooltip.displayColors = false;
 const ACCENT = '#0066FF';
+const ACCENT_FADED = '#A5C0FF';
 const PALETTE = ['#0066FF','#7C3AED','#16A34A','#F59E0B','#DC2626','#0891B2','#DB2777','#65A30D','#EA580C','#4B5563'];
 
 // ---------- helpers ----------
 function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]); }
+function fmt(n){ return new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 1 }).format(n||0); }
+function humanDate(s){ return s ? `${s.slice(8,10)}.${s.slice(5,7)}.${s.slice(0,4)}` : ''; }
 function shortName(full){ if(!full) return 'Не вказано'; const m = full.match(/\(([^)]+)\)/); return m ? m[1] : full; }
 function handlePart(full){ if(!full) return ''; const idx = full.indexOf('('); return idx>-1 ? full.slice(0,idx) : full; }
 function qtyOf(t){ return t.qty!=null ? t.qty : 1; }
@@ -391,10 +455,10 @@ function buildOverview(){
   const active = TASKS.filter(t=>['Нова таска','В процесі','Перевірка','Hold'].includes(t.status)).length;
   const totalUnits = doneTasks.reduce((s,t)=>s+qtyOf(t),0);
 
-  document.getElementById('kOvTasks').textContent = total;
+  document.getElementById('kOvTasks').textContent = fmt(total);
   document.getElementById('kOvTasksSub').textContent = `${done} виконано, ${active} активні`;
-  document.getElementById('kOvUnits').textContent = totalUnits;
-  document.getElementById('kOvDone').textContent = done;
+  document.getElementById('kOvUnits').textContent = fmt(totalUnits);
+  document.getElementById('kOvDone').textContent = fmt(done);
   document.getElementById('kOvDoneSub').textContent = total ? `${(done/total*100).toFixed(0)}% від загальної кількості` : '—';
   document.getElementById('kOvActive').textContent = active;
 
@@ -404,7 +468,7 @@ function buildOverview(){
   const wkKeys = Object.keys(wk).sort();
   new Chart(document.getElementById('weekChart'), {
     type:'bar',
-    data:{ labels: wkKeys.map(k=>fmtPeriodLabel(k,'week')), datasets:[{label:'Крео', data: wkKeys.map(k=>wk[k]), backgroundColor:ACCENT, borderRadius:5, maxBarThickness:34}] },
+    data:{ labels: wkKeys.map(k=>fmtPeriodLabel(k,'week')), datasets:[{label:'Крео', data: wkKeys.map(k=>wk[k]), backgroundColor: wkKeys.map((k,i)=>i===wkKeys.length-1?ACCENT_FADED:ACCENT), borderRadius:5, maxBarThickness:34}] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, x:{grid:{display:false}} } }
   });
 
@@ -474,7 +538,7 @@ function buildOverview(){
       const d = buyerUnitsDone[name]||0;
       return `<tr>
         <td class="name-cell">${esc(name)}</td>
-        <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(val/maxBuyer*100).toFixed(0)}%"></div></div><b>${d} / ${val}</b></div></td>
+        <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${(val/maxBuyer*100).toFixed(0)}%"></div></div><b>${fmt(d)} / ${fmt(val)}</b></div></td>
       </tr>`;
     }).join('');
 
@@ -572,10 +636,10 @@ function renderDesigner(){
   const avgTurn = arrTurn.length? (arrTurn.reduce((a,b)=>a+b,0)/arrTurn.length).toFixed(2) : '—';
 
   document.getElementById('designerStats').innerHTML = `
-    <div class="si"><div class="v">${totalUnits}</div><div class="l">Крео (одиниць)</div></div>
-    <div class="si"><div class="v">${totalTasks}</div><div class="l">Тасок виконано</div></div>
-    <div class="si"><div class="v">${myAll.length-totalTasks}</div><div class="l">Активних тасок</div></div>
-    <div class="si"><div class="v">${avgTurn}</div><div class="l">Дн. в сер. на таску</div></div>
+    <div class="stat-card"><div class="v">${fmt(totalUnits)}</div><div class="l">Крео (одиниць)</div></div>
+    <div class="stat-card green"><div class="v">${totalTasks}</div><div class="l">Тасок виконано</div></div>
+    <div class="stat-card amber"><div class="v">${myAll.length-totalTasks}</div><div class="l">Активних тасок</div></div>
+    <div class="stat-card violet"><div class="v">${avgTurn}</div><div class="l">Дн. в сер. на таску</div></div>
   `;
 
   // grouping
@@ -654,7 +718,7 @@ function renderDesigner(){
       <td>${esc(t.geo)||'—'}</td>
       <td>${esc(t.buyer)||'—'}</td>
       <td>${t.qty!=null?t.qty:'—'}</td>
-      <td>${esc(t.eff_date)||'—'}</td>
+      <td>${humanDate(t.eff_date)||'—'}</td>
       <td>${statusTag(t.status)}</td>
     </tr>`).join('')}
   `;
@@ -705,7 +769,7 @@ function renderFullTable(){
   rows.sort((a,b)=> (b.eff_date||'').localeCompare(a.eff_date||''));
 
   const totalUnits = rows.reduce((s,t)=>s+qtyOf(t),0);
-  document.getElementById('tableRowCount').textContent = `${rows.length} тасок · ${totalUnits} крео (одиниць)`;
+  document.getElementById('tableRowCount').textContent = `${fmt(rows.length)} тасок · ${fmt(totalUnits)} крео (одиниць)`;
 
   document.getElementById('fullTable').innerHTML = `
     <tr><th>ID</th><th>Назва</th><th>Дизайнер</th><th>Баєр</th><th>GEO</th><th>Тип</th><th>Крео</th><th>Пріоритет</th><th>Дата</th><th>Статус</th></tr>
@@ -718,7 +782,7 @@ function renderFullTable(){
       <td>${esc(t.type)||'—'}</td>
       <td>${t.qty!=null?t.qty:'—'}</td>
       <td>${prioTag(t.priority)}</td>
-      <td>${esc(t.eff_date)||'—'}</td>
+      <td>${humanDate(t.eff_date)||'—'}</td>
       <td>${statusTag(t.status)}</td>
     </tr>`).join('')}
   `;
@@ -734,10 +798,11 @@ function renderFullTable(){
 
     const allDates = TASKS.map(t=>t.eff_date).filter(Boolean).sort();
     document.getElementById('periodPill').textContent = allDates.length
-      ? `${allDates[0]} → ${allDates[allDates.length-1]}` : '—';
+      ? `📅 ${humanDate(allDates[0])} → ${humanDate(allDates[allDates.length-1])}` : '—';
     if(snapshot.generatedAt){
-      document.getElementById('headerSub').textContent =
-        `Дизайн-команда · авто-синхронізація з Notion · оновлено ${new Date(snapshot.generatedAt).toLocaleString('uk-UA')} · крео = одиниця креатива (поле «К-сть»)`;
+      const up = document.getElementById('updatedPill');
+      up.hidden = false;
+      up.textContent = '🔄 Оновлено ' + new Date(snapshot.generatedAt).toLocaleString('uk-UA', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
     }
 
     buildOverview();
