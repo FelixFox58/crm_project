@@ -189,6 +189,12 @@
 
     <!-- ================= OVERVIEW TAB ================= -->
     <div class="tab-panel active" id="tab-overview">
+      <div class="controls-row" style="justify-content:flex-end;">
+        <div class="control-field month-select">
+          <label for="ovMonthSelect">Період</label>
+          <select id="ovMonthSelect"></select>
+        </div>
+      </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-top"><span class="kpi-ic">📋</span><span class="label">Тасок всього</span></div><div class="value" id="kOvTasks">—</div><div class="sub" id="kOvTasksSub">—</div></div>
         <div class="kpi"><div class="kpi-top"><span class="kpi-ic">🎨</span><span class="label">Крео (одиниць)</span></div><div class="value" id="kOvUnits">—</div><div class="sub" id="kOvUnitsSub">сума поля «К-сть»</div></div>
@@ -203,7 +209,7 @@
           <h3>Крео по тижнях</h3>
           <div class="card-sub">Кількість одиниць креатива (не тасок), здано за тиждень</div>
           <div class="chart-box" style="height:270px;"><canvas id="weekChart"></canvas></div>
-          <div class="note">Останній стовпчик — поточний тиждень, дані ще накопичуються.</div>
+          <div class="note" id="weekChartNote">Останній стовпчик — поточний тиждень, дані ще накопичуються.</div>
         </div>
         <div class="card">
           <h3>Тип креатива</h3>
@@ -449,11 +455,33 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 // ================= OVERVIEW =================
+function makeChart(id, cfg){
+  const el = document.getElementById(id);
+  const existing = Chart.getChart(el);
+  if(existing) existing.destroy();
+  return new Chart(el, cfg);
+}
+
+function getAllMonths(){
+  return Array.from(new Set(TASKS.filter(t=>t.eff_date).map(t=>monthKey(t.eff_date)))).sort().reverse();
+}
+
+function initOverviewControls(){
+  const sel = document.getElementById('ovMonthSelect');
+  sel.innerHTML = '<option value="">Усі місяці</option>' +
+    getAllMonths().map(m=>`<option value="${m}">${fmtMonthFilterLabel(m)}</option>`).join('');
+  sel.addEventListener('change', buildOverview);
+}
+
 function buildOverview(){
-  const total = TASKS.length;
-  const done = doneTasks.length;
-  const active = TASKS.filter(t=>['Нова таска','В процесі','Перевірка','Hold'].includes(t.status)).length;
-  const totalUnits = doneTasks.reduce((s,t)=>s+qtyOf(t),0);
+  const selMonth = document.getElementById('ovMonthSelect').value;
+  const src = selMonth ? TASKS.filter(t=>t.eff_date && monthKey(t.eff_date)===selMonth) : TASKS;
+  const srcDone = src.filter(isDone);
+
+  const total = src.length;
+  const done = srcDone.length;
+  const active = src.filter(t=>['Нова таска','В процесі','Перевірка','Hold'].includes(t.status)).length;
+  const totalUnits = srcDone.reduce((s,t)=>s+qtyOf(t),0);
 
   document.getElementById('kOvTasks').textContent = fmt(total);
   document.getElementById('kOvTasksSub').textContent = `${done} виконано, ${active} активні`;
@@ -464,28 +492,34 @@ function buildOverview(){
 
   // weekly units
   const wk = {};
-  doneTasks.forEach(t=>{ if(!t.eff_date) return; const k=weekKey(t.eff_date); wk[k]=(wk[k]||0)+qtyOf(t); });
+  srcDone.forEach(t=>{ if(!t.eff_date) return; const k=weekKey(t.eff_date); wk[k]=(wk[k]||0)+qtyOf(t); });
   const wkKeys = Object.keys(wk).sort();
-  new Chart(document.getElementById('weekChart'), {
+  const isLatestPeriod = !selMonth || selMonth === getAllMonths()[0];
+  document.getElementById('weekChartNote').hidden = !isLatestPeriod;
+  makeChart('weekChart', {
     type:'bar',
-    data:{ labels: wkKeys.map(k=>fmtPeriodLabel(k,'week')), datasets:[{label:'Крео', data: wkKeys.map(k=>wk[k]), backgroundColor: wkKeys.map((k,i)=>i===wkKeys.length-1?ACCENT_FADED:ACCENT), borderRadius:5, maxBarThickness:34}] },
+    data:{ labels: wkKeys.map(k=>fmtPeriodLabel(k,'week')), datasets:[{label:'Крео', data: wkKeys.map(k=>wk[k]), backgroundColor: wkKeys.map((k,i)=>(isLatestPeriod && i===wkKeys.length-1)?ACCENT_FADED:ACCENT), borderRadius:5, maxBarThickness:34}] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, x:{grid:{display:false}} } }
   });
 
   // trend: last vs prev week
+  const trendSub = document.getElementById('kOvTrendSub');
   if(wkKeys.length>=2){
     const last = wk[wkKeys[wkKeys.length-1]];
     const prev = wk[wkKeys[wkKeys.length-2]];
     const diff = prev>0 ? ((last-prev)/prev*100) : 0;
-    document.getElementById('kOvTrendVal').textContent = last;
-    const sub = document.getElementById('kOvTrendSub');
-    sub.textContent = `${diff>=0?'▲':'▼'} ${Math.abs(diff).toFixed(0)}% до попереднього тижня`;
-    sub.className = 'sub ' + (diff>=0?'good':'warn');
+    document.getElementById('kOvTrendVal').textContent = fmt(last);
+    trendSub.textContent = `${diff>=0?'▲':'▼'} ${Math.abs(diff).toFixed(0)}% до попереднього тижня`;
+    trendSub.className = 'sub ' + (diff>=0?'good':'warn');
+  } else {
+    document.getElementById('kOvTrendVal').textContent = wkKeys.length ? fmt(wk[wkKeys[0]]) : '—';
+    trendSub.textContent = 'останній тиждень вибірки';
+    trendSub.className = 'sub';
   }
 
   // type donut
-  const typeEntries = Object.entries(TASKS.reduce((acc,t)=>{ if(t.type && t.type!=='-'){ acc[t.type]=(acc[t.type]||0)+1; } return acc; },{})).sort((a,b)=>b[1]-a[1]);
-  new Chart(document.getElementById('typeChart'), {
+  const typeEntries = Object.entries(src.reduce((acc,t)=>{ if(t.type && t.type!=='-'){ acc[t.type]=(acc[t.type]||0)+1; } return acc; },{})).sort((a,b)=>b[1]-a[1]);
+  makeChart('typeChart', {
     type:'doughnut',
     data:{ labels: typeEntries.map(e=>e[0]), datasets:[{data: typeEntries.map(e=>e[1]), backgroundColor:PALETTE, borderWidth:0}] },
     options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false}} }
@@ -501,10 +535,13 @@ function buildOverview(){
   }).join('');
 
   // designer leaderboard (units vs tasks)
-  const designers = META.designers;
-  const dUnits = designers.map(d=>doneTasks.filter(t=>t.designer===d).reduce((s,t)=>s+qtyOf(t),0));
-  const dTasks = designers.map(d=>doneTasks.filter(t=>t.designer===d).length);
-  new Chart(document.getElementById('designerChart'), {
+  const unitsByDesigner = {};
+  srcDone.forEach(t=>{ if(t.designer) unitsByDesigner[t.designer]=(unitsByDesigner[t.designer]||0)+qtyOf(t); });
+  const designers = META.designers.filter(d=>src.some(t=>t.designer===d))
+    .sort((a,b)=>(unitsByDesigner[b]||0)-(unitsByDesigner[a]||0));
+  const dUnits = designers.map(d=>unitsByDesigner[d]||0);
+  const dTasks = designers.map(d=>srcDone.filter(t=>t.designer===d).length);
+  makeChart('designerChart', {
     type:'bar',
     data:{ labels: designers.map(shortName), datasets:[
       {label:'Крео (одиниць)', data:dUnits, backgroundColor:ACCENT, borderRadius:5, maxBarThickness:26},
@@ -515,7 +552,7 @@ function buildOverview(){
 
   // designer speed table
   const speedRows = designers.map(d=>{
-    const arr = doneTasks.filter(t=>t.designer===d && t.turnaround!=null).map(t=>t.turnaround);
+    const arr = srcDone.filter(t=>t.designer===d && t.turnaround!=null).map(t=>t.turnaround);
     const avg = arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
     return [d, avg];
   }).filter(r=>r[1]!=null).sort((a,b)=>a[1]-b[1]);
@@ -529,8 +566,8 @@ function buildOverview(){
   // buyer table (top10 by units)
   const buyerUnits = {};
   const buyerUnitsDone = {};
-  TASKS.forEach(t=>{ if(!t.buyer) return; buyerUnits[t.buyer]=(buyerUnits[t.buyer]||0)+qtyOf(t); });
-  doneTasks.forEach(t=>{ if(!t.buyer) return; buyerUnitsDone[t.buyer]=(buyerUnitsDone[t.buyer]||0)+qtyOf(t); });
+  src.forEach(t=>{ if(!t.buyer) return; buyerUnits[t.buyer]=(buyerUnits[t.buyer]||0)+qtyOf(t); });
+  srcDone.forEach(t=>{ if(!t.buyer) return; buyerUnitsDone[t.buyer]=(buyerUnitsDone[t.buyer]||0)+qtyOf(t); });
   const buyerRows = Object.entries(buyerUnits).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const maxBuyer = Math.max(1, ...buyerRows.map(r=>r[1]));
   document.getElementById('buyerTable').innerHTML = `<tr><th>Баєр</th><th>Крео виконано / всього</th></tr>` +
@@ -544,9 +581,9 @@ function buildOverview(){
 
   // geo chart (by task count)
   const geoCounts = {};
-  TASKS.forEach(t=>{ if(!t.geo) return; geoCounts[t.geo]=(geoCounts[t.geo]||0)+1; });
+  src.forEach(t=>{ if(!t.geo) return; geoCounts[t.geo]=(geoCounts[t.geo]||0)+1; });
   const geoEntries = Object.entries(geoCounts).sort((a,b)=>b[1]-a[1]).slice(0,12);
-  new Chart(document.getElementById('geoChart'), {
+  makeChart('geoChart', {
     type:'bar',
     data:{ labels: geoEntries.map(e=>e[0]), datasets:[{data: geoEntries.map(e=>e[1]), backgroundColor:ACCENT, borderRadius:5}] },
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, y:{grid:{display:false}} } }
@@ -555,9 +592,9 @@ function buildOverview(){
   // priority donut
   const prioColors = {'Medium':'#9CA3AF','High':'#F59E0B','Critical':'#DC2626'};
   const prioCounts = {};
-  TASKS.forEach(t=>{ if(!t.priority) return; prioCounts[t.priority]=(prioCounts[t.priority]||0)+1; });
+  src.forEach(t=>{ if(!t.priority) return; prioCounts[t.priority]=(prioCounts[t.priority]||0)+1; });
   const prioEntries = Object.entries(prioCounts).sort((a,b)=>b[1]-a[1]);
-  new Chart(document.getElementById('priorityChart'), {
+  makeChart('priorityChart', {
     type:'doughnut',
     data:{ labels: prioEntries.map(e=>e[0]), datasets:[{data: prioEntries.map(e=>e[1]), backgroundColor: prioEntries.map((e,i)=>prioColors[e[0]]||PALETTE[i%PALETTE.length]), borderWidth:0}] },
     options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{position:'right', labels:{boxWidth:10, usePointStyle:true, pointStyle:'circle'}}} }
@@ -565,9 +602,9 @@ function buildOverview(){
 
   // category chart
   const catCounts = {};
-  TASKS.forEach(t=>{ if(!t.task) return; catCounts[t.task]=(catCounts[t.task]||0)+1; });
+  src.forEach(t=>{ if(!t.task) return; catCounts[t.task]=(catCounts[t.task]||0)+1; });
   const catEntries = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  new Chart(document.getElementById('categoryChart'), {
+  makeChart('categoryChart', {
     type:'bar',
     data:{ labels: catEntries.map(e=>e[0].length>28?e[0].slice(0,27)+'…':e[0]), datasets:[{data: catEntries.map(e=>e[1]), backgroundColor:PALETTE, borderRadius:5, maxBarThickness:40}] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#EEF0F3'}, ticks:{precision:0}}, x:{grid:{display:false}, ticks:{maxRotation:30}} } }
@@ -805,6 +842,7 @@ function renderFullTable(){
       up.textContent = '🔄 Оновлено ' + new Date(snapshot.generatedAt).toLocaleString('uk-UA', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
     }
 
+    initOverviewControls();
     buildOverview();
     initDesignerTab();
     initFullTable();
